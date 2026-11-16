@@ -1,0 +1,120 @@
+name: Build and Publish Extensions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Unit tests and debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run unit tests and assemble debug APK
+        run: ./gradlew testDebugUnitTest assembleDebug
+
+  publish:
+    name: Sign release APKs and publish repo branch
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Validate persistent signing secrets
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          missing=()
+          [[ -z "$SIGNING_KEY" ]] && missing+=("SIGNING_KEY")
+          [[ -z "$ALIAS" ]] && missing+=("ALIAS")
+          [[ -z "$KEY_STORE_PASSWORD" ]] && missing+=("KEY_STORE_PASSWORD")
+          [[ -z "$KEY_PASSWORD" ]] && missing+=("KEY_PASSWORD")
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error::Missing required signing secret(s): ${missing[*]}. Run ./scripts/gen-keystore.sh locally and configure the four secrets in repository settings."
+            exit 1
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode keystore and assemble release APKs
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          printf '%s' "$SIGNING_KEY" | base64 -d > signingkey.jks
+          ./gradlew assembleRelease
+
+      - name: Remove keystore from workspace
+        if: always()
+        run: rm -f signingkey.jks
+
+      - name: Generate Extension Repository index
+        run: |
+          mkdir -p repo/apk
+          find src -path "*/build/outputs/apk/release/*-release.apk" | while read -r apk; do
+            base="$(basename "$apk")"
+            cp "$apk" "repo/apk/${base/-release.apk/.apk}"
+          done
+
+          INSPECTOR_URL="https://github.com/komikku-app/aniyomi-extensions-inspector/releases/download/v1.5.0.2/Aniyomi.Extensions.Inspector-v1.5.0.2-r799.jar"
+          curl -fsSL "$INSPECTOR_URL" -o Inspector.jar
+          java -jar Inspector.jar "repo/apk" "output.json" "inspector-tmp"
+
+          node .github/scripts/build-repo.mjs \
+            --repo-dir repo \
+            --inspector-json output.json \
+            --repo-name "idjoo Anikku Extensions" \
+            --short-name "idjoo" \
+            --website "https://github.com/${{ github.repository }}"
+
+      - name: Publish orphan repo branch
+        run: |
+          cd repo
+          git init -b repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(repo): publish extension repository (${GITHUB_SHA::7})"
+          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/repo

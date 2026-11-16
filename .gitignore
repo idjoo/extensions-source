@@ -22,5 +22,9 @@ keystore.properties
 result
 result-*
 
-# Tester / Inspector local caches
+# Tester / Inspector / local repo dry-run caches
 .tools/
+repo/
+inspector-tmp/
+output.json
+Inspector.jar
