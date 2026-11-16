@@ -1,0 +1,3 @@
+# Fetch live Stream Descriptors at playback time with dynamic AES key recovery
+
+Series pages embed an SSR-cached `sourceFirst` token for Episode 1, and all stream/subtitle URLs are encrypted with a 256-bit AES-GCM key bundled in DramaTip's client JavaScript. Because SSR-cached CDN signatures expire (`upstream 403`) and client bundle keys can rotate on site redeploys, `getVideoList` always requests fresh descriptors from `/api/episode-source/{bookId}/{serial}?lang={locale}` (retrying once with `refresh=1` if needed) and automatically scrapes and caches a rotated AES-GCM key from DramaTip's active player bundle if decryption with the bundled key fails.

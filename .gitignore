@@ -1,0 +1,26 @@
+# Gradle & Android
+.gradle/
+build/
+**/build/
+local.properties
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Keystores & secrets (never commit!)
+*.jks
+*.keystore
+keystore.properties
+
+# IDE & OS
+.idea/
+*.iml
+.DS_Store
+.direnv/
+result
+result-*
+
+# Tester / Inspector local caches
+.tools/

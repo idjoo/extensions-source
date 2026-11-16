@@ -1,0 +1,3 @@
+# Custom HLS master parser for 9:16 vertical streams and demuxed tracks
+
+Standard Aniyomi `PlaylistUtils` labels HLS variants by frame height and does not order multi-language subtitle tracks by source locale, which mislabels 9:16 portrait microdramas (`1080x1920` becomes `1920p`, breaking Anikku's `1080p`/`720p` quality preferences) and mishandles providers like Vigloo that split audio and 10+ subtitle languages into separate `#EXT-X-MEDIA` groups. We parse `#EXTM3U` master manifests directly so resolution labels use `min(width, height)`, demuxed audio groups bind to `Video.audioTracks`, and subtitle tracks sort with the active Catalog Source's Locale first.

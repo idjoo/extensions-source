@@ -1,0 +1,3 @@
+# Standalone repository using the standard aniyomi-extensions scaffold and Nix
+
+Community Aniyomi extension monorepos face takedown churn (`yuzono/aniyomi-extensions` is DMCA-blocked on GitHub), and the development host runs NixOS without global JDK or Android SDK installations. We maintain DramaTip in its own standalone repository paired with a `flake.nix` dev shell (`libVersion` compatible with Anikku, verified via `komikku-app/aniyomi-extensions-tester` and indexed via `komikku-app/aniyomi-extensions-inspector`), while preserving the standard `aniyomi-extensions` multi-module layout (`common.gradle`, `core/`, `lib/`, `src/all/dramatip/`) so the module remains drop-in compatible with upstream monorepos and additional extensions.
