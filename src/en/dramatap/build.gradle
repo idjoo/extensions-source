@@ -1,0 +1,8 @@
+ext {
+    extName = 'DramaTap'
+    extClass = '.DramaTap'
+    extVersionCode = 1
+    isNsfw = false
+}
+
+apply from: "$rootDir/common.gradle"

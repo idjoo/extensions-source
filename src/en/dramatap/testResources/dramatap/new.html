@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6c5ce7">
+<!-- FlickReels 切片同时带 Origin 和 Referer 就 403（除第 1 段），其他片源不发 Referer 也都放行 -->
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- 下面这段会被 SSR 整块替换；图标和 theme-color 每页都要，所以留在区外。
+     canonical 必须在区内：漏在区外的话，详情页会同时带自己的和首页的两个 canonical。 -->
+<title>New Short Dramas — Latest Releases Added Daily | dramatap</title>
+<meta name="description" content="The newest short dramas on dramatap, updated every time we add titles. Watch the latest releases free in your browser — no app, no signup.">
+<link rel="canonical" href="https://dramatap.app/new">
+<meta property="og:site_name" content="dramatap">
+<meta property="og:type" content="website">
+<meta property="og:title" content="New Short Dramas — Latest Releases Added Daily | dramatap">
+<meta property="og:description" content="The newest short dramas on dramatap, updated every time we add titles. Watch the latest releases free in your browser — no app, no signup.">
+<meta property="og:url" content="https://dramatap.app/new">
+<meta property="og:image" content="https://dramatap.app/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="New Short Dramas — Latest Releases Added Daily | dramatap">
+<meta name="twitter:description" content="The newest short dramas on dramatap, updated every time we add titles. Watch the latest releases free in your browser — no app, no signup.">
+<meta name="twitter:image" content="https://dramatap.app/og-cover.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://dramatap.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "New",
+      "item": "https://dramatap.app/new"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "New Short Dramas",
+  "url": "https://dramatap.app/new",
+  "description": "The newest short dramas on dramatap, updated every time we add titles. Watch the latest releases free in your browser — no app, no signup."
+}
+</script>
+<style>
+.ssr-page-hero { max-width: 980px; margin: 0 auto 12px; padding: 20px 16px 0; text-align: center; }
+.ssr-page-hero h1 { font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.ssr-page-hero .sub { color: #8b909a; font-size: 14px; }
+.ssr-card { text-decoration: none; color: inherit; display: block; }
+.new-day { max-width: 980px; margin: 0 auto; padding: 18px 16px 0; font-size: 13px;
+           font-weight: 600; color: #7a839a; letter-spacing: .06em; text-transform: uppercase; }
+.new-day:first-of-type { padding-top: 4px; }
+.ssr-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: 980px; margin: 24px auto 16px; padding: 0 16px; }
+.ssr-page-btn { min-width: 38px; height: 38px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #2a2f3a; border-radius: 8px; background: #1a1d24; color: #e8eaed; text-decoration: none; font-size: 14px; transition: all .15s; box-sizing: border-box; }
+.ssr-page-btn:not(.disabled):not(.cur):hover { border-color: #6c5ce7; color: #fff; background: #232733; }
+.ssr-page-btn.cur { background: #6c5ce7; border-color: #6c5ce7; color: #fff; font-weight: 600; cursor: default; }
+.ssr-page-btn.disabled { opacity: .35; pointer-events: none; color: #8b909a; }
+.ssr-page-dots { padding: 0 4px; color: #8b909a; font-size: 14px; }
+</style>
+<link rel="preconnect" href="https://img.dramatap.app">
+<link rel="stylesheet" href="/app.css?v=0a488c54-60a9-488a-848b-12edc3a49418">
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <a class="brand" href="/" aria-label="DramaTap home">
+      <span class="brand-name"><img src="/icon-192.png" alt="" width="26" height="26">DramaTap</span>
+    </a>
+    <nav class="hnav" aria-label="Site">
+      <a href="/new" id="nav-new">New</a>
+      <a href="/browse" id="nav-browse">Browse</a>
+      <a href="/tags" id="nav-tags">Tags</a>
+      <!-- 两个都渲染、都先藏着，由 vip.js 按会员状态挑一个显示。
+           不能在服务端按身份选：导航在外壳里，全站页面共用同一份边缘缓存。 -->
+      <a href="/vip" id="nav-vip" class="nav-vip" hidden>VIP</a>
+      <a href="/vip" id="nav-getvip" hidden>VIP</a>
+    </nav>
+  </div>
+</header>
+
+
+
+<div class="ssr-page-hero">
+  <h1>New Short Dramas</h1>
+  <div class="sub">The latest titles added to dramatap · Stream free in your browser</div>
+  <div style="margin-top:8px;"><a href="/browse" style="color:#6c5ce7; text-decoration:none; font-size:14px;">Browse the full catalog →</a></div>
+</div>
+
+<div class="searchbar">
+  <!-- 这句英文和下面 i18n 的 search_ph.en 是同一份文案的两处副本，改一处必须改另一处：
+       这里是 JS 起来之前（含爬虫、JS 挂掉时）显示的那份，i18n 那份管切回英文。
+       都得短——手机端输入框只有 215px 可用宽，长文案会被截成残句。 -->
+  <input id="q" placeholder="Search any drama or tag">
+  <button id="searchbtn" onclick="search()">Search</button>
+</div>
+
+<!-- 继续观看。内容按 localStorage 填，服务端一个字都不渲染：
+     首页 HTML 是全站共用的边缘缓存，按人不同的东西只能在客户端出。
+     夹在搜索框和结果容器之间：搜索一开始整块就藏了（见 search.js），不会挡住下面的结果。
+     写在 SSR 区段之外，非首页那几页留着它但永远是空的。
+     由紧跟的内联脚本在解析时画出：等 app.js 再插，首页已经显示了，整页会被往下推。
+     它跟 history.js 的 cwRender/cwCardHtml 是同一份模板的两处副本，改一处必须改另一处。 -->
+<div id="cw" hidden></div>
+<script>
+(() => {
+  if (location.pathname !== '/') return;
+  let l;
+  try { l = JSON.parse(localStorage.getItem('dt_hist') || '[]'); } catch (e) { return; }
+  if (!Array.isArray(l)) return;
+  l = l.filter(x => x && x.i && x.e);
+  if (!l.length) return;
+  const esc = s => String(s).replace(/[<>&"']/g, c =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]));
+  const card = (d, pos) => {
+    const t = esc(d.t || 'Drama ' + d.i);
+    return `<a class="card cw-card" href="/d/${d.i}${d.s ? '/' + d.s : ''}" data-id="${d.i}" data-ep="${esc(d.e)}" data-pos="${pos}">` +
+      `<span class="ph${d.c ? '' : ' bad'}" data-t="${t}">${d.c ? `<img src="${esc(d.c)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('bad')">` : ''}</span>` +
+      `<div class="t">${t}</div><div class="m">EP ${esc(d.e)}</div></a>`;
+  };
+  const box = document.getElementById('cw');
+  box.innerHTML = `<div class="sec-hd"><h2>Continue watching</h2><a class="sec-more cw-all" href="/history">See all &rarr;</a></div>` +
+    `<div class="grid grid-home">${l.slice(0, 4).map(card).join('')}</div>`;
+  box.hidden = false;
+})();
+</script>
+
+<!-- 结果容器必须紧跟搜索框：SSR 首页会把下面 SSR_HOME 整段换成真正的首页内容，
+     排在它后面的话搜完得翻过整个首页才看得到结果 -->
+<div id="status" class="status"></div>
+<div id="grid" class="grid"></div>
+<div id="suggest" hidden>
+  <div class="suggest-hd" id="suggest-hd">You might like</div>
+  <div id="suggest-grid" class="grid"></div>
+</div>
+
+<!-- SSR 页被上面这个搜索块劈成两段，分派规则见 worker/src/index.js 的 inject() -->
+
+<div class="new-day">Just added</div>
+<div class="grid">
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149175/wrong-enemy-right-love" title="Wrong Enemy, Right Love">
+      <span class="ph" data-t="Wrong Enemy, Right Love"><img src="https://img.dramatap.app/90/1ea35b402f76466384562f65bf809585-1794831286911.png" alt="Wrong Enemy, Right Love" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Wrong Enemy, Right Love</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149491/trapped-by-the-alpha-i-killed" title="Trapped by the Alpha I “Killed”">
+      <span class="ph" data-t="Trapped by the Alpha I “Killed”"><img src="https://img.dramatap.app/91/f3dd3b1f8d1f4682ae1dd1bb2d6cf560-1794838776467.jpg" alt="Trapped by the Alpha I “Killed”" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Trapped by the Alpha I “Killed”</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149527/cast-out-omega-servant-his-sickly-obsessive-disabled-tycoon" title="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon">
+      <span class="ph" data-t="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon"><img src="https://img.dramatap.app/91/b5514d3778744a8888ee1f458542a1de-1794838974980.png" alt="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149523/reborn-to-marry-my-ex-s-worst-enemy" title="Reborn to Marry My Ex&#39;s Worst Enemy">
+      <span class="ph" data-t="Reborn to Marry My Ex&#39;s Worst Enemy"><img src="https://img.dramatap.app/91/fb37d51c47f84c4589c7c86800a8c1c8-1794838951171.jpg" alt="Reborn to Marry My Ex&#39;s Worst Enemy" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Reborn to Marry My Ex&#39;s Worst Enemy</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149138/my-wedding-security-guard-is-a-hidden-billionaire" title="My Wedding Security Guard Is a Hidden Billionaire">
+      <span class="ph" data-t="My Wedding Security Guard Is a Hidden Billionaire"><img src="https://img.dramatap.app/20/8296622353534e299a19e26ed7af57f5-1794823344986.jpg" alt="My Wedding Security Guard Is a Hidden Billionaire" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Wedding Security Guard Is a Hidden Billionaire</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149185/the-worst-christmas" title="The Worst Christmas">
+      <span class="ph" data-t="The Worst Christmas"><img src="https://img.dramatap.app/90/caef5f9c3ab2483e9b0f4edeb60d623a-1794831416725.jpg" alt="The Worst Christmas" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Worst Christmas</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149136/secretary-by-day-secret-by-night" title="Secretary by Day, Secret by Night">
+      <span class="ph" data-t="Secretary by Day, Secret by Night"><img src="https://img.dramatap.app/20/aeda32d57ff0466e9d524aba3bae6dd2-1794823250222.jpg" alt="Secretary by Day, Secret by Night" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Secretary by Day, Secret by Night</div>
+      <div class="m">EP43 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149178/breaking-the-betrothal-imarried-the-wolf-rogue" title="Breaking the Betrothal: IMarried the Wolf Rogue">
+      <span class="ph" data-t="Breaking the Betrothal: IMarried the Wolf Rogue"><img src="https://img.dramatap.app/90/347399e053bc4b82979f347572f4d79c-1794831352645.jpg" alt="Breaking the Betrothal: IMarried the Wolf Rogue" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Breaking the Betrothal: IMarried the Wolf Rogue</div>
+      <div class="m">EP100 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149518/left-at-the-altar-crowned-by-the-heiress" title="Left at the Altar, Crowned by the Heiress">
+      <span class="ph" data-t="Left at the Altar, Crowned by the Heiress"><img src="https://img.dramatap.app/91/67cabccf2c1a40919215ec94fc40cd71-1794838924853.jpg" alt="Left at the Altar, Crowned by the Heiress" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Left at the Altar, Crowned by the Heiress</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149504/the-false-heir-a-duchess-s-revenge" title="The False Heir：A Duchess’s Revenge">
+      <span class="ph" data-t="The False Heir：A Duchess’s Revenge"><img src="https://img.dramatap.app/91/b285958f96514e278c816fb9c0270ce3-1794838841785.jpg" alt="The False Heir：A Duchess’s Revenge" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The False Heir：A Duchess’s Revenge</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149140/carrying-the-billionaire-039-s-baby" title="Carrying the Billionaire&amp;#039;s Baby">
+      <span class="ph" data-t="Carrying the Billionaire&amp;#039;s Baby"><img src="https://img.dramatap.app/20/ab4515128aa24ca7a69b02bb3b07cd67-1794823456817.jpg" alt="Carrying the Billionaire&amp;#039;s Baby" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Carrying the Billionaire&amp;#039;s Baby</div>
+      <div class="m">EP42 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="0" href="/d/149511/you-gave-her-my-cure-so-i-married-another-man" title="You Gave Her My Cure, So I Married Another Man">
+      <span class="ph" data-t="You Gave Her My Cure, So I Married Another Man"><img src="https://img.dramatap.app/91/a37b434f7a124ef7a81f8df7cec02b58-1794838889502.png" alt="You Gave Her My Cure, So I Married Another Man" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">You Gave Her My Cure, So I Married Another Man</div>
+      <div class="m">EP65 TV</div>
+    </a>
+  
+</div>
+<div class="new-day">Nov 16</div>
+<div class="grid">
+  
+    <a class="card ssr-card" data-grp="1" href="/d/149113/my-billionaire-farmer-husband" title="My Billionaire Farmer Husband">
+      <span class="ph" data-t="My Billionaire Farmer Husband"><img src="https://img.dramatap.app/12/5cc945a4535d4e3f811e07e8b0ee9ee5-1794805651316.png" alt="My Billionaire Farmer Husband" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Billionaire Farmer Husband</div>
+      <div class="m">EP41 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/149112/the-warden-s-little-miracle" title="The Warden&#39;s Little Miracle">
+      <span class="ph" data-t="The Warden&#39;s Little Miracle"><img src="https://img.dramatap.app/12/b40101e8924c4cb19f381c57a20aed8f-1794805633694.png" alt="The Warden&#39;s Little Miracle" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Warden&#39;s Little Miracle</div>
+      <div class="m">EP47 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148750/the-dragon-s-bride" title="The Dragon&#39;s Bride">
+      <span class="ph" data-t="The Dragon&#39;s Bride"><img src="https://img.dramatap.app/fix/148750.webp" alt="The Dragon&#39;s Bride" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Dragon&#39;s Bride</div>
+      <div class="m">EP57 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148701/my-fianc-s-father-is-addicted-to-my-milk" title="My Fiancé&#39;s Father Is Addicted to My Milk">
+      <span class="ph" data-t="My Fiancé&#39;s Father Is Addicted to My Milk"><img src="https://img.dramatap.app/fix/148701.webp" alt="My Fiancé&#39;s Father Is Addicted to My Milk" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Fiancé&#39;s Father Is Addicted to My Milk</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148887/a-brother-s-duty" title="A Brother&#39;s Duty">
+      <span class="ph" data-t="A Brother&#39;s Duty"><img src="https://img.dramatap.app/fix/148887.webp" alt="A Brother&#39;s Duty" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">A Brother&#39;s Duty</div>
+      <div class="m">EP53 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148670/no-more-waiting-for-you" title="No More Waiting for You">
+      <span class="ph" data-t="No More Waiting for You"><img src="https://img.dramatap.app/12/d5d477c7c39c46d98103caab22635a17-1794719192663.png" alt="No More Waiting for You" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">No More Waiting for You</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148950/the-alpha-s-impossible-twins" title="The Alpha‘s Impossible Twins">
+      <span class="ph" data-t="The Alpha‘s Impossible Twins"><img src="https://img.dramatap.app/fix/148950.webp" alt="The Alpha‘s Impossible Twins" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Alpha‘s Impossible Twins</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148972/i-became-my-ex-s-sister-in-law" title="I Became My Ex’s Sister-in-Law">
+      <span class="ph" data-t="I Became My Ex’s Sister-in-Law"><img src="https://img.dramatap.app/fix/148972.webp" alt="I Became My Ex’s Sister-in-Law" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">I Became My Ex’s Sister-in-Law</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148667/the-third-letter" title="The Third Letter">
+      <span class="ph" data-t="The Third Letter"><img src="https://img.dramatap.app/12/39a321a5e7774532a2be69f98cb19746-1794719159687.png" alt="The Third Letter" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Third Letter</div>
+      <div class="m">EP45 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148766/married-to-my-ex-s-billionaire-father" title="Married to My Ex&#39;s Billionaire Father">
+      <span class="ph" data-t="Married to My Ex&#39;s Billionaire Father"><img src="https://img.dramatap.app/fix/148766.webp" alt="Married to My Ex&#39;s Billionaire Father" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Married to My Ex&#39;s Billionaire Father</div>
+      <div class="m">EP46 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148745/reborn-as-the-mafia-king" title="Reborn as the Mafia King">
+      <span class="ph" data-t="Reborn as the Mafia King"><img src="https://img.dramatap.app/fix/148745.webp" alt="Reborn as the Mafia King" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Reborn as the Mafia King</div>
+      <div class="m">EP56 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="1" href="/d/148652/undead-academy-i-bound-a-villain-mentor-system-on-halloween" title="Undead Academy: I Bound a Villain Mentor System on Halloween">
+      <span class="ph" data-t="Undead Academy: I Bound a Villain Mentor System on Halloween"><img src="https://img.dramatap.app/12/cfb205ba20214dd6bd3ee5d9032261ab-1794718893678.jpg" alt="Undead Academy: I Bound a Villain Mentor System on Halloween" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Undead Academy: I Bound a Villain Mentor System on Halloween</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+</div>
+<div class="new-day">Nov 15</div>
+<div class="grid">
+  
+    <a class="card ssr-card" data-grp="2" href="/d/147910/my-mafia-boyfriend-was-a-lie" title="My Mafia Boyfriend Was a Lie">
+      <span class="ph" data-t="My Mafia Boyfriend Was a Lie"><img src="https://img.dramatap.app/12/cb430cd76ea249ae9211d7879277d9f6-1794632431366.jpg" alt="My Mafia Boyfriend Was a Lie" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Mafia Boyfriend Was a Lie</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148015/the-lion-god-goes-full-beast-mode" title="The Lion God Goes Full Beast Mode">
+      <span class="ph" data-t="The Lion God Goes Full Beast Mode"><img src="https://img.dramatap.app/fix/148015.webp" alt="The Lion God Goes Full Beast Mode" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Lion God Goes Full Beast Mode</div>
+      <div class="m">EP43 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/147936/not-your-daughter" title="Not Your Daughter">
+      <span class="ph" data-t="Not Your Daughter"><img src="https://img.dramatap.app/12/f61f6f101249483882d833a8ca999434-1794632802298.png" alt="Not Your Daughter" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Not Your Daughter</div>
+      <div class="m">EP37 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148257/my-brother-my-forbidden-love" title="My Brother, My Forbidden Love">
+      <span class="ph" data-t="My Brother, My Forbidden Love"><img src="https://img.dramatap.app/fix/148257.webp" alt="My Brother, My Forbidden Love" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Brother, My Forbidden Love</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148188/burning-my-vows-becoming-the-dragon-king-s-bride" title="Burning My Vows, Becoming the Dragon King&#39;s Bride">
+      <span class="ph" data-t="Burning My Vows, Becoming the Dragon King&#39;s Bride"><img src="https://img.dramatap.app/fix/148188.webp" alt="Burning My Vows, Becoming the Dragon King&#39;s Bride" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Burning My Vows, Becoming the Dragon King&#39;s Bride</div>
+      <div class="m">EP51 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148114/reborn-from-the-flames-we-dumped-our-husbands" title="Reborn from the Flames: We Dumped Our Husbands">
+      <span class="ph" data-t="Reborn from the Flames: We Dumped Our Husbands"><img src="https://img.dramatap.app/fix/148114.webp" alt="Reborn from the Flames: We Dumped Our Husbands" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Reborn from the Flames: We Dumped Our Husbands</div>
+      <div class="m">EP44 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/147922/the-daughter-they-broke" title="The Daughter They Broke">
+      <span class="ph" data-t="The Daughter They Broke"><img src="https://img.dramatap.app/12/998b07a0345f49e8b52f44704912029d-1794632557165.png" alt="The Daughter They Broke" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Daughter They Broke</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148054/the-disfigured-stand-inis-secretlyan-heiress" title="The Disfigured Stand-InIs Secretlyan Heiress">
+      <span class="ph" data-t="The Disfigured Stand-InIs Secretlyan Heiress"><img src="https://img.dramatap.app/90/48aa21db52c743c596cd5bf644480580-1794658566044.png" alt="The Disfigured Stand-InIs Secretlyan Heiress" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Disfigured Stand-InIs Secretlyan Heiress</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148056/reborn-humiliate-my-vicious-roommate-on-the-cruise" title="Reborn: Humiliate My Vicious Roommate on the Cruise">
+      <span class="ph" data-t="Reborn: Humiliate My Vicious Roommate on the Cruise"><img src="https://img.dramatap.app/90/3dd5be928e2d49d587c44f565e7ab98e-1794658583117.jpg" alt="Reborn: Humiliate My Vicious Roommate on the Cruise" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Reborn: Humiliate My Vicious Roommate on the Cruise</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/147908/frozen-rebirth-my-doomsday-fortress" title="Frozen Rebirth: My Doomsday Fortress">
+      <span class="ph" data-t="Frozen Rebirth: My Doomsday Fortress"><img src="https://img.dramatap.app/12/bf04b40e76c84834aac25a9a2a8d1007-1794632411884.jpg" alt="Frozen Rebirth: My Doomsday Fortress" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Frozen Rebirth: My Doomsday Fortress</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/147920/erasing-his-identity-his-ceo-wife-searches-madly-for-him" title="Erasing His Identity, His CEO Wife Searches Madly for Him">
+      <span class="ph" data-t="Erasing His Identity, His CEO Wife Searches Madly for Him"><img src="https://img.dramatap.app/12/e1df9f3eb6644ae5bf7b2c49e091d1f5-1794632540152.png" alt="Erasing His Identity, His CEO Wife Searches Madly for Him" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Erasing His Identity, His CEO Wife Searches Madly for Him</div>
+      <div class="m">EP35 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="2" href="/d/148057/the-heiress-plays-poor-her-ceo-husband-tests-her-every-night" title="The Heiress Plays Poor, Her CEO Husband Tests Her Every Night">
+      <span class="ph" data-t="The Heiress Plays Poor, Her CEO Husband Tests Her Every Night"><img src="https://img.dramatap.app/90/bc2e5e74af2745ce934cb7a944e078b6-1794658591387.jpg" alt="The Heiress Plays Poor, Her CEO Husband Tests Her Every Night" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Heiress Plays Poor, Her CEO Husband Tests Her Every Night</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+</div>
+<div class="new-day">Nov 14</div>
+<div class="grid">
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146845/my-psycho-vampire" title="My Psycho Vampire">
+      <span class="ph" data-t="My Psycho Vampire"><img src="https://img.dramatap.app/fix/146845.webp" alt="My Psycho Vampire" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Psycho Vampire</div>
+      <div class="m">EP70 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146990/his-biggest-fan" title="His BIGGEST Fan">
+      <span class="ph" data-t="His BIGGEST Fan"><img src="https://img.dramatap.app/fix/146990.webp" alt="His BIGGEST Fan" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">His BIGGEST Fan</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146994/massimo" title="Massimo">
+      <span class="ph" data-t="Massimo"><img src="https://img.dramatap.app/fix/146994.webp" alt="Massimo" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Massimo</div>
+      <div class="m">EP56 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146871/stranded-on-a-deserted-island-with-the-ceo" title="Stranded on a Deserted Island with the CEO">
+      <span class="ph" data-t="Stranded on a Deserted Island with the CEO"><img src="https://img.dramatap.app/fix/146871.webp" alt="Stranded on a Deserted Island with the CEO" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Stranded on a Deserted Island with the CEO</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146981/turned-gay-in-a-killing-game" title="Turned gay in a killing game">
+      <span class="ph" data-t="Turned gay in a killing game"><img src="https://img.dramatap.app/91/4ec8151104c34a92b6a7ded4195bde2a-1794493201299.jpg" alt="Turned gay in a killing game" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Turned gay in a killing game</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147272/no-longer-yours" title="No Longer Yours">
+      <span class="ph" data-t="No Longer Yours"><img src="https://img.dramatap.app/12/064f40dcc4f94d27a619e36455a9e348-1794546407226.jpg" alt="No Longer Yours" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">No Longer Yours</div>
+      <div class="m">EP44 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147243/his-boss-my-ex" title="His Boss, My Ex">
+      <span class="ph" data-t="His Boss, My Ex"><img src="https://img.dramatap.app/12/a8555ecc3ea14b6b934d810004c2baa9-1794546036349.jpg" alt="His Boss, My Ex" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">His Boss, My Ex</div>
+      <div class="m">EP56 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147513/three-mafia-kings-one-runaway-wife" title="Three Mafia Kings, One Runaway Wife">
+      <span class="ph" data-t="Three Mafia Kings, One Runaway Wife"><img src="https://img.dramatap.app/fix/147513.webp" alt="Three Mafia Kings, One Runaway Wife" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Three Mafia Kings, One Runaway Wife</div>
+      <div class="m">EP81 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147344/my-gigolo-my-savior" title="My Gigolo, My Savior">
+      <span class="ph" data-t="My Gigolo, My Savior"><img src="https://img.dramatap.app/21/f852b90e175043298ba4919f4c154e3c-1794567640174.png" alt="My Gigolo, My Savior" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">My Gigolo, My Savior</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/146764/tempted" title="TEMPTED">
+      <span class="ph" data-t="TEMPTED"><img src="https://img.dramatap.app/20/96ef4792502c49f797d3c45080026acd-1794477628908.jpg" alt="TEMPTED" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">TEMPTED</div>
+      <div class="m">EP42 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147159/erin-kuykendall" title="Erin Kuykendall">
+      <span class="ph" data-t="Erin Kuykendall"><img src="https://img.dramatap.app/8/76e6a7e1a6134fb2ac36586b264c69b9-1794617980835.webp" alt="Erin Kuykendall" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">Erin Kuykendall</div>
+      <div class="m">EP65 TV</div>
+    </a>
+  
+    <a class="card ssr-card" data-grp="3" href="/d/147591/the-alpha-s-discarded-daughter" title="The Alpha&#39;s Discarded Daughter">
+      <span class="ph" data-t="The Alpha&#39;s Discarded Daughter"><img src="https://img.dramatap.app/fix/147591.webp" alt="The Alpha&#39;s Discarded Daughter" loading="lazy" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+      <div class="t">The Alpha&#39;s Discarded Daughter</div>
+      <div class="m">EP46 TV</div>
+    </a>
+  
+</div>
+
+<nav class="ssr-pagination" aria-label="Pagination">
+  <span class="ssr-page-btn disabled">‹ Prev</span>
+  <span class="ssr-page-btn cur">1</span>
+  <a class="ssr-page-btn" href="/new/2">2</a>
+  <a class="ssr-page-btn" href="/new/3">3</a>
+  <span class="ssr-page-dots">…</span>
+  <a class="ssr-page-btn" href="/new/6">6</a>
+  <a class="ssr-page-btn" href="/new/2">Next ›</a>
+</nav>
+<div style="text-align:center; margin: 20px 0 40px;">
+  <a href="/browse" style="color:#6c5ce7; text-decoration:none; font-size:14px;">Browse all short dramas →</a>
+</div>
+
+
+
+<footer class="site-foot">
+  <a href="/new">New</a><a href="/browse">Browse</a><a href="/tags">Categories</a><a href="/vip">VIP</a><a href="/pricing">Pricing</a><a href="/sitemap.xml">Sitemap</a>
+  <!-- 合规四件套：广告网络审核第一眼就找页脚，缺一个就可能被判不合规 -->
+  <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/dmca">DMCA</a><a href="/contact">Contact</a>
+  <a href="mailto:contact@dramatap.app">Support: contact@dramatap.app</a>
+  <span>&copy; DramaTap</span>
+</footer>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+  <div class="box">
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2 id="mtitle"></h2>
+    <div id="mmeta" class="meta"></div>
+    <div id="eps" class="eps"></div>
+    <p class="hint" id="epshint"></p>
+  </div>
+</div>
+
+<div id="player">
+  <video id="video" playsinline></video>
+  <div id="tapzone"></div>
+  <div class="pbar">
+    <div class="ptitle" id="ptitle"></div>
+    <span role="button" onclick="closePlayer()">✕</span>
+  </div>
+  <div class="nav">
+    <button id="prev" onclick="step(-1)">← Prev</button>
+    <button id="epbtn" class="epbtn" onclick="toggleSheet()"></button>
+    <button id="next" onclick="step(1)">Next →</button>
+  </div>
+  <div id="pg"><div class="track"><div class="fill" id="pgfill"></div><div class="knob" id="pgknob"></div></div></div>
+  <div id="ploading"><i></i></div>
+  <!-- onclick 内联去掉了：抢跑被拦时这颗 ▶ 就已经挂出来，而 resumePlay 长在主脚本里，
+       那会儿还没定义，点一下先抛一个 ReferenceError（抢跑自绑的监听器照跑，所以能播，
+       但转圈收不掉、控制台一片红）。改由主脚本 addEventListener 统一绑。 -->
+  <div id="tapplay"><i>▶</i><b>Tap to play</b></div>
+  <div id="unmute"><span>🔇</span> Tap for sound</div>
+  <div id="perr"></div>
+  <!-- VIP 专属剧的闸门。文案由 vip-gate.js 按集号填，卡片外不吃点击：
+       底部的上一集/选集和顶栏 ✕ 照常够得着 -->
+  <div id="pvip">
+    <div class="pvip-card">
+      <b id="pvip-t"></b>
+      <p id="pvip-s"></p>
+      <button id="pvip-go" class="pvip-go">Unlock with VIP</button>
+      <button id="pvip-x" class="pvip-x">Not now</button>
+    </div>
+  </div>
+  <div id="autonext">
+    <div class="box">
+      <div class="lb" id="an-lb"></div>
+      <div class="n" id="an-n">3</div>
+      <button class="go" id="an-go" onclick="step(1)"></button>
+    </div>
+  </div>
+  <div id="finish">
+    <div class="box">
+      <div class="done" id="fin-done"></div>
+      <div class="cards" id="fin-cards"></div>
+      <button class="cancel" id="fin-cancel" onclick="autonextStop()"></button>
+    </div>
+  </div>
+  <div id="sheetmask" onclick="closeSheet()"></div>
+  <div id="epsheet">
+    <div class="sheet-hd">
+      <span id="sheettitle"></span>
+      <span role="button" onclick="closeSheet()">✕</span>
+    </div>
+    <div class="sheet-seg" id="sheetseg" hidden></div>
+    <div class="sheet-bd">
+      <div id="sheeteps" class="eps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 都不加 defer：位置在 body 末尾，DOM 已经建好，执行时机跟原来内联那份完全一样。
+     试过给两个都加 defer（想让 414KB 的 hls.min.js 不阻塞解析），
+     本地连点 Next 换集会间歇性卡在 loadstart 不出 loadedmetadata，8 连跳挂 4 次；
+     去掉就稳定。省下的那点解析时间不值得拿播放稳定性换。 -->
+<script src="/hls.min.js"></script>
+<script src="/app.js?v=0a488c54-60a9-488a-848b-12edc3a49418"></script>
+</body>
+</html>
