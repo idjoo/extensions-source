@@ -49,6 +49,7 @@ const inspectorPath = path.resolve(args["inspector-json"] || "output.json");
 const repoName = args["repo-name"] || "idjoo Anikku Extensions";
 const shortName = args["short-name"] || "idjoo";
 const website = args["website"] || "https://github.com/idjoo/extensions";
+const icon = args["icon"] || "https://ember.idjo.cc/images/logo.png";
 const aapt2Bin = findAapt2(args["aapt2"] || args["aapt"]);
 
 fs.mkdirSync(iconDir, { recursive: true });
