@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6c5ce7">
+<!-- FlickReels 切片同时带 Origin 和 Referer 就 403（除第 1 段），其他片源不发 Referer 也都放行 -->
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- 下面这段会被 SSR 整块替换；图标和 theme-color 每页都要，所以留在区外。
+     canonical 必须在区内：漏在区外的话，详情页会同时带自己的和首页的两个 canonical。 -->
+<!--SSR_HEAD-->
+<title>DramaTap - Watch 40,000+ Free Short Dramas Online, No App Needed</title>
+<meta name="description" content="Watch 40,000+ free short dramas online with all episodes unlocked. Stream directly in your browser on DramaTap — no app download or signup required.">
+<link rel="canonical" href="https://dramatap.app/">
+<meta name="robots" content="index, follow">
+<meta property="og:site_name" content="DramaTap">
+<meta property="og:type" content="website">
+<meta property="og:title" content="DramaTap - Watch 40,000+ Free Short Dramas Online, No App Needed">
+<meta property="og:description" content="Watch 40,000+ free short dramas online with all episodes unlocked. Stream directly in your browser on DramaTap — no app download or signup required.">
+<meta property="og:url" content="https://dramatap.app/">
+<meta property="og:image" content="https://dramatap.app/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<!-- 首页级实体声明。放在 SSR_HEAD 块内是有意的：详情页会把整块 SSR_HEAD 换走
+     （见 index.js 的 SSR_HEAD_RE），所以这两个节点只出现在首页，不会和详情页的
+     TVSeries 抢主体，也不会重复出现 35000 次。
+     没有标 SearchAction：那要求 /?q={term} 这个 URL 真的能直出搜索结果，
+     而前端目前只认 qa/ep 两个参数，标了就是给引擎一个打不开的承诺。 -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"DramaTap","alternateName":"dramatap","url":"https://dramatap.app/","inLanguage":"en","description":"Search English short dramas by title, trope, or tag, and watch them in the browser without installing an app.","publisher":{"@id":"https://dramatap.app/#org"}}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","@id":"https://dramatap.app/#org","name":"DramaTap","url":"https://dramatap.app/","logo":"https://dramatap.app/icon-512.png"}
+</script>
+<!--/SSR_HEAD-->
+<link rel="preconnect" href="https://img.dramatap.app">
+<link rel="stylesheet" href="/app.css?v=0a488c54-60a9-488a-848b-12edc3a49418">
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <a class="brand" href="/" aria-label="DramaTap home">
+      <span class="brand-name"><img src="/icon-192.png" alt="" width="26" height="26">DramaTap</span>
+    </a>
+    <nav class="hnav" aria-label="Site">
+      <a href="/new" id="nav-new">New</a>
+      <a href="/browse" id="nav-browse">Browse</a>
+      <a href="/tags" id="nav-tags">Tags</a>
+      <!-- 两个都渲染、都先藏着，由 vip.js 按会员状态挑一个显示。
+           不能在服务端按身份选：导航在外壳里，全站页面共用同一份边缘缓存。 -->
+      <a href="/vip" id="nav-vip" class="nav-vip" hidden>VIP</a>
+      <a href="/vip" id="nav-getvip" hidden>VIP</a>
+    </nav>
+  </div>
+</header>
+<!--SSR_HERO--><div class="hero">
+  <h1 id="hero-title">Search 40,000+ short dramas</h1>
+  <div class="sub" id="tagline">Find any title, every episode, and where to watch</div>
+</div><!--/SSR_HERO-->
+
+
+
+<div class="searchbar">
+  <!-- 这句英文和下面 i18n 的 search_ph.en 是同一份文案的两处副本，改一处必须改另一处：
+       这里是 JS 起来之前（含爬虫、JS 挂掉时）显示的那份，i18n 那份管切回英文。
+       都得短——手机端输入框只有 215px 可用宽，长文案会被截成残句。 -->
+  <input id="q" placeholder="Search any drama or tag">
+  <button id="searchbtn" onclick="search()">Search</button>
+</div>
+
+<!-- 继续观看。内容按 localStorage 填，服务端一个字都不渲染：
+     首页 HTML 是全站共用的边缘缓存，按人不同的东西只能在客户端出。
+     夹在搜索框和结果容器之间：搜索一开始整块就藏了（见 search.js），不会挡住下面的结果。
+     写在 SSR 区段之外，非首页那几页留着它但永远是空的。
+     由紧跟的内联脚本在解析时画出：等 app.js 再插，首页已经显示了，整页会被往下推。
+     它跟 history.js 的 cwRender/cwCardHtml 是同一份模板的两处副本，改一处必须改另一处。 -->
+<div id="cw" hidden></div>
+<script>
+(() => {
+  if (location.pathname !== '/') return;
+  let l;
+  try { l = JSON.parse(localStorage.getItem('dt_hist') || '[]'); } catch (e) { return; }
+  if (!Array.isArray(l)) return;
+  l = l.filter(x => x && x.i && x.e);
+  if (!l.length) return;
+  const esc = s => String(s).replace(/[<>&"']/g, c =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]));
+  const card = (d, pos) => {
+    const t = esc(d.t || 'Drama ' + d.i);
+    return `<a class="card cw-card" href="/d/${d.i}${d.s ? '/' + d.s : ''}" data-id="${d.i}" data-ep="${esc(d.e)}" data-pos="${pos}">` +
+      `<span class="ph${d.c ? '' : ' bad'}" data-t="${t}">${d.c ? `<img src="${esc(d.c)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('bad')">` : ''}</span>` +
+      `<div class="t">${t}</div><div class="m">EP ${esc(d.e)}</div></a>`;
+  };
+  const box = document.getElementById('cw');
+  box.innerHTML = `<div class="sec-hd"><h2>Continue watching</h2><a class="sec-more cw-all" href="/history">See all &rarr;</a></div>` +
+    `<div class="grid grid-home">${l.slice(0, 4).map(card).join('')}</div>`;
+  box.hidden = false;
+})();
+</script>
+
+<!-- 结果容器必须紧跟搜索框：SSR 首页会把下面 SSR_HOME 整段换成真正的首页内容，
+     排在它后面的话搜完得翻过整个首页才看得到结果 -->
+<div id="status" class="status"></div>
+<div id="grid" class="grid"></div>
+<div id="suggest" hidden>
+  <div class="suggest-hd" id="suggest-hd">You might like</div>
+  <div id="suggest-grid" class="grid"></div>
+</div>
+
+<!-- SSR 页被上面这个搜索块劈成两段，分派规则见 worker/src/index.js 的 inject() -->
+
+
+<div class="home">
+  
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2 id="trend-title">Trending now</h2><a class="sec-more" id="explore-browse" href="/browse">Browse all 40,000+ &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" href="/d/2000247/the-mafia-boss-and-his-hacker-bride" title="The Mafia BOSS and His Hacker Bride">
+        <span class="ph" data-t="The Mafia BOSS and His Hacker Bride"><img src="https://img.dramatap.app/extra/2000247.webp" alt="The Mafia BOSS and His Hacker Bride" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Mafia BOSS and His Hacker…</div>
+        <div class="m">52 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/1002245/dumped-by-my-fianc-the-homeless-man-i-wrongly-married-turns-out-to-be-an-alpha" title="Dumped by My Fiancé, the Homeless Man I Wrongly Married Turns Out to Be an Alpha">
+        <span class="ph" data-t="Dumped by My Fiancé, the Homeless Man I Wrongly Married Turns Out to Be an Alpha"><img src="https://img.dramatap.app/miralune/1002245.webp" alt="Dumped by My Fiancé, the Homeless Man I Wrongly Married Turns Out to Be an Alpha" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Dumped by My Fiancé, the Home…</div>
+        <div class="m">51 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/2000277/tutor-me-if-you-dare" title="Tutor Me, If You Dare">
+        <span class="ph" data-t="Tutor Me, If You Dare"><img src="https://img.dramatap.app/extra/2000277.webp" alt="Tutor Me, If You Dare" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Tutor Me, If You Dare</div>
+        <div class="m">36 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/2000187/my-mafia-husband-lost-control" title="My Mafia Husband Lost Control">
+        <span class="ph" data-t="My Mafia Husband Lost Control"><img src="https://img.dramatap.app/extra/2000187.webp" alt="My Mafia Husband Lost Control" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">My Mafia Husband Lost Control</div>
+        <div class="m">180 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/1001531/the-tempted-dilf-is-my-professor" title="The Tempted DILF Is My Professor">
+        <span class="ph" data-t="The Tempted DILF Is My Professor"><img src="https://img.dramatap.app/reelshort/1001531.webp" alt="The Tempted DILF Is My Professor" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Tempted DILF Is My Profes…</div>
+        <div class="m">56 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/146994/massimo" title="Massimo">
+        <span class="ph" data-t="Massimo"><img src="https://img.dramatap.app/fix/146994.webp" alt="Massimo" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Massimo</div>
+        <div class="m">56 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/129795/the-amnesiac-heiress-betrayed-she-became-the-fashion-queen" title="The Amnesiac Heiress: Betrayed, She Became the Fashion Queen">
+        <span class="ph" data-t="The Amnesiac Heiress: Betrayed, She Became the Fashion Queen"><img src="https://img.dramatap.app/90/1ad5715ef732438eb831c8bd8ba6947f-1792757715800.jpg" alt="The Amnesiac Heiress: Betrayed, She Became the Fashion Queen" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Amnesiac Heiress: Betraye…</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" href="/d/148015/the-lion-god-goes-full-beast-mode" title="The Lion God Goes Full Beast Mode">
+        <span class="ph" data-t="The Lion God Goes Full Beast Mode"><img src="https://img.dramatap.app/fix/148015.webp" alt="The Lion God Goes Full Beast Mode" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Lion God Goes Full Beast…</div>
+        <div class="m">43 episodes</div>
+      </a></div>
+  </section>
+  
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2 id="new-title">New this week</h2><a class="sec-more" id="explore-new" href="/new">See all new &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_new" href="/d/149175/wrong-enemy-right-love" title="Wrong Enemy, Right Love">
+        <span class="ph" data-t="Wrong Enemy, Right Love"><img src="https://img.dramatap.app/90/1ea35b402f76466384562f65bf809585-1794831286911.png" alt="Wrong Enemy, Right Love" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Wrong Enemy, Right Love</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149491/trapped-by-the-alpha-i-killed" title="Trapped by the Alpha I “Killed”">
+        <span class="ph" data-t="Trapped by the Alpha I “Killed”"><img src="https://img.dramatap.app/91/f3dd3b1f8d1f4682ae1dd1bb2d6cf560-1794838776467.jpg" alt="Trapped by the Alpha I “Killed”" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Trapped by the Alpha I “Kille…</div>
+        <div class="m">59 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149527/cast-out-omega-servant-his-sickly-obsessive-disabled-tycoon" title="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon">
+        <span class="ph" data-t="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon"><img src="https://img.dramatap.app/91/b5514d3778744a8888ee1f458542a1de-1794838974980.png" alt="Cast-out Omega Servant &amp; His Sickly Obsessive Disabled Tycoon" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Cast-out Omega Servant &amp; His…</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149523/reborn-to-marry-my-ex-s-worst-enemy" title="Reborn to Marry My Ex&#39;s Worst Enemy">
+        <span class="ph" data-t="Reborn to Marry My Ex&#39;s Worst Enemy"><img src="https://img.dramatap.app/91/fb37d51c47f84c4589c7c86800a8c1c8-1794838951171.jpg" alt="Reborn to Marry My Ex&#39;s Worst Enemy" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Reborn to Marry My Ex&#39;s Worst…</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149138/my-wedding-security-guard-is-a-hidden-billionaire" title="My Wedding Security Guard Is a Hidden Billionaire">
+        <span class="ph" data-t="My Wedding Security Guard Is a Hidden Billionaire"><img src="https://img.dramatap.app/20/8296622353534e299a19e26ed7af57f5-1794823344986.jpg" alt="My Wedding Security Guard Is a Hidden Billionaire" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">My Wedding Security Guard Is…</div>
+        <div class="m">40 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149185/the-worst-christmas" title="The Worst Christmas">
+        <span class="ph" data-t="The Worst Christmas"><img src="https://img.dramatap.app/90/caef5f9c3ab2483e9b0f4edeb60d623a-1794831416725.jpg" alt="The Worst Christmas" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">The Worst Christmas</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149136/secretary-by-day-secret-by-night" title="Secretary by Day, Secret by Night">
+        <span class="ph" data-t="Secretary by Day, Secret by Night"><img src="https://img.dramatap.app/20/aeda32d57ff0466e9d524aba3bae6dd2-1794823250222.jpg" alt="Secretary by Day, Secret by Night" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Secretary by Day, Secret by N…</div>
+        <div class="m">43 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_new" href="/d/149178/breaking-the-betrothal-imarried-the-wolf-rogue" title="Breaking the Betrothal: IMarried the Wolf Rogue">
+        <span class="ph" data-t="Breaking the Betrothal: IMarried the Wolf Rogue"><img src="https://img.dramatap.app/90/347399e053bc4b82979f347572f4d79c-1794831352645.jpg" alt="Breaking the Betrothal: IMarried the Wolf Rogue" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"><span class="nb">NEW</span></span>
+        <div class="t">Breaking the Betrothal: IMarr…</div>
+        <div class="m">100 episodes</div>
+      </a></div>
+  </section>
+  
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Underdog Rise</h2><a class="sec-more" href="/tag/underdog-rise">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/46405/the-fool-he-made-me" title="The Fool He Made Me">
+        <span class="ph" data-t="The Fool He Made Me"><img src="https://img.dramatap.app/6/f95cf4b7c9304ecfb68efeae8e58f189-1786833406131.jpg" alt="The Fool He Made Me" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Fool He Made Me</div>
+        <div class="m">31 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46385/touch-her-and-burn" title="Touch Her and Burn">
+        <span class="ph" data-t="Touch Her and Burn"><img src="https://img.dramatap.app/6/de4ef1875d81426f97f2364f58c2cce6-1786838407531.jpg" alt="Touch Her and Burn" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Touch Her and Burn</div>
+        <div class="m">30 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/31638/the-last-of-99-goodbyes" title="The Last of 99 Goodbyes">
+        <span class="ph" data-t="The Last of 99 Goodbyes"><img src="https://img.dramatap.app/6/c69df62504034eb2a187855c750fdb5f-1787432433903.jpg" alt="The Last of 99 Goodbyes" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Last of 99 Goodbyes</div>
+        <div class="m">30 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/60869/the-mafia-s-forgotten-wife-pregnant-and-abandoned" title="The Mafia’s Forgotten Wife: Pregnant and Abandoned">
+        <span class="ph" data-t="The Mafia’s Forgotten Wife: Pregnant and Abandoned"><img src="https://img.dramatap.app/6/8a0e24a83ae044c88e6dfae5ef58fd4c-1786845054656.jpg" alt="The Mafia’s Forgotten Wife: Pregnant and Abandoned" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Mafia’s Forgotten Wife: P…</div>
+        <div class="m">34 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>CEO</h2><a class="sec-more" href="/tag/ceo">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/22956/runaway-bride-the-billionaire-s-twins" title="Runaway Bride The Billionaire&#39;s Twins">
+        <span class="ph" data-t="Runaway Bride The Billionaire&#39;s Twins"><img src="https://img.dramatap.app/29/2d19516fd97c48c782f1c464b5c8cf81-1776684016805.png" alt="Runaway Bride The Billionaire&#39;s Twins" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Runaway Bride The Billionaire…</div>
+        <div class="m">100 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/22957/obsessed-devotion" title="Obsessed Devotion">
+        <span class="ph" data-t="Obsessed Devotion"><img src="https://img.dramatap.app/29/81368651afec405c8dff8479f1f6218d-1776684035851.png" alt="Obsessed Devotion" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Obsessed Devotion</div>
+        <div class="m">80 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/60657/drowning-in-love" title="Drowning in Love">
+        <span class="ph" data-t="Drowning in Love"><img src="https://img.dramatap.app/6/53262612260f4fcca873f7211130a442-1786839952089.jpg" alt="Drowning in Love" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Drowning in Love</div>
+        <div class="m">32 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/23062/faking-amnesia-i-married-the-tycoon" title="Faking Amnesia ： I Married The Tycoon">
+        <span class="ph" data-t="Faking Amnesia ： I Married The Tycoon"><img src="https://img.dramatap.app/30/388e7c76e04d48afa8b8546629f75b56-1776685411846.png" alt="Faking Amnesia ： I Married The Tycoon" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Faking Amnesia ： I Married Th…</div>
+        <div class="m">120 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Payback</h2><a class="sec-more" href="/tag/payback">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/36347/i-m-done-being-a-yes-girl" title="I&#39;m Done Being A Yes Girl">
+        <span class="ph" data-t="I&#39;m Done Being A Yes Girl"><img src="https://img.dramatap.app/12/ebbbb43f6b51483ca6322db3df354c03-1786814164962.jpg" alt="I&#39;m Done Being A Yes Girl" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">I&#39;m Done Being A Yes Girl</div>
+        <div class="m">56 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/61960/sold-to-the-sleeping-colonel" title="Sold to the Sleeping Colonel">
+        <span class="ph" data-t="Sold to the Sleeping Colonel"><img src="https://img.dramatap.app/12/7e90148fce7c41fbb2449ce1fdc0230c-1786814717482.jpg" alt="Sold to the Sleeping Colonel" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Sold to the Sleeping Colonel</div>
+        <div class="m">57 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/35973/your-concubine-i-m-his-empress-now" title="Your Concubine? I&#39;m His Empress Now">
+        <span class="ph" data-t="Your Concubine? I&#39;m His Empress Now"><img src="https://img.dramatap.app/12/3366cdf11ebd4eb2bd0af06b2babf743-1786813583282.jpg" alt="Your Concubine? I&#39;m His Empress Now" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Your Concubine? I&#39;m His Empre…</div>
+        <div class="m">69 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/37786/he-returned-from-hell-to-ruin-them" title="He Returned From Hell to Ruin Them">
+        <span class="ph" data-t="He Returned From Hell to Ruin Them"><img src="https://img.dramatap.app/12/26a1b90f8de84f5893ddf4232d26b778-1786814197328.jpg" alt="He Returned From Hell to Ruin Them" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">He Returned From Hell to Ruin…</div>
+        <div class="m">68 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Rebirth</h2><a class="sec-more" href="/tag/rebirth">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/35943/reborn-princess-the-general-was-too-late" title="Reborn Princess: The General Was Too Late">
+        <span class="ph" data-t="Reborn Princess: The General Was Too Late"><img src="https://img.dramatap.app/12/451821befc2444a98eced0ff93b3f3f0-1786813552456.jpg" alt="Reborn Princess: The General Was Too Late" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Reborn Princess: The General…</div>
+        <div class="m">57 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/38701/reborn-princess-no-way-back-to-love" title="Reborn Princess: No Way Back to Love">
+        <span class="ph" data-t="Reborn Princess: No Way Back to Love"><img src="https://img.dramatap.app/12/cb8551df24cd4e06a04b420b9370ecbe-1786814351069.jpg" alt="Reborn Princess: No Way Back to Love" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Reborn Princess: No Way Back…</div>
+        <div class="m">57 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/22976/the-flight-she-didn-t-take" title="The Flight She Didn&#39;t Take">
+        <span class="ph" data-t="The Flight She Didn&#39;t Take"><img src="https://img.dramatap.app/29/4a4c9c67d95a4836a250798e7e87494c-1776684281271.png" alt="The Flight She Didn&#39;t Take" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Flight She Didn&#39;t Take</div>
+        <div class="m">50 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/26743/reborne-again-i-built-my-careers-by-writing-short-dramas" title="REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS">
+        <span class="ph" data-t="REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS"><img src="https://img.dramatap.app/34/d39e6b797ab04f3ba4943e3c9abbe37a-1777266165435.png" alt="REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">REBORNE AGAIN I BUILT MY CARE…</div>
+        <div class="m">15 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Mafia</h2><a class="sec-more" href="/tag/mafia">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/40873/the-wedding-that-will-never-be" title="The Wedding That Will Never Be">
+        <span class="ph" data-t="The Wedding That Will Never Be"><img src="https://img.dramatap.app/6/3561e8bffe0a46f1b170d92638402d73-1786805783596.jpg" alt="The Wedding That Will Never Be" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Wedding That Will Never Be</div>
+        <div class="m">39 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/40829/the-girl-they-brought-home-replaced-me" title="The Girl They Brought Home Replaced Me">
+        <span class="ph" data-t="The Girl They Brought Home Replaced Me"><img src="https://img.dramatap.app/6/4052ce95532d41b1b8d69650f728363b-1787432783699.jpg" alt="The Girl They Brought Home Replaced Me" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Girl They Brought Home Re…</div>
+        <div class="m">39 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46399/reborn-i-m-done-being-the-don-s-wife" title="Reborn, I’m Done Being The Don’s Wife">
+        <span class="ph" data-t="Reborn, I’m Done Being The Don’s Wife"><img src="https://img.dramatap.app/6/da58a7badbbd4ab3b9653bb73e8a49ed-1786832622285.jpg" alt="Reborn, I’m Done Being The Don’s Wife" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Reborn, I’m Done Being The Do…</div>
+        <div class="m">52 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/31385/a-breath-away-from-death" title="A Breath Away from Death">
+        <span class="ph" data-t="A Breath Away from Death"><img src="https://img.dramatap.app/6/ad1ca0ab350940128e1cf89ec9041c45-1786829153167.jpg" alt="A Breath Away from Death" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">A Breath Away from Death</div>
+        <div class="m">30 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>System</h2><a class="sec-more" href="/tag/system">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/67863/the-zombie-dating-system" title="The Zombie Dating System">
+        <span class="ph" data-t="The Zombie Dating System"><img src="https://img.dramatap.app/6/81328ede530243979a31ccfa8c8b1fc5-1786830369541.jpg" alt="The Zombie Dating System" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Zombie Dating System</div>
+        <div class="m">57 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/94226/matched-with-nine-alpha-mates" title="Matched with Nine Alpha Mates">
+        <span class="ph" data-t="Matched with Nine Alpha Mates"><img src="https://img.dramatap.app/46/73e53df775e04f4b8b8243f3f2859ddf-1788338119860.png" alt="Matched with Nine Alpha Mates" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Matched with Nine Alpha Mates</div>
+        <div class="m">80 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/6867/beastmen-fighting-for-my-love" title="Beastmen Fighting for My Love">
+        <span class="ph" data-t="Beastmen Fighting for My Love"><img src="https://img.dramatap.app/12/3f7d2a3a3b3e4f3bbcea0a6c34c51343-1786806901910.jpg" alt="Beastmen Fighting for My Love" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Beastmen Fighting for My Love</div>
+        <div class="m">63 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/7006/bankrupt-princess-with-a-billionaire-system" title="Bankrupt Princess with a Billionaire System">
+        <span class="ph" data-t="Bankrupt Princess with a Billionaire System"><img src="https://img.dramatap.app/12/cf55e0a35cec431f8aa5c2cc4db04897-1786807031131.jpg" alt="Bankrupt Princess with a Billionaire System" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Bankrupt Princess with a Bill…</div>
+        <div class="m">88 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Heiress</h2><a class="sec-more" href="/tag/heiress">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/38075/love-that-bites-pain-that-stays-2" title="Love That Bites, Pain That Stays 2">
+        <span class="ph" data-t="Love That Bites, Pain That Stays 2"><img src="https://img.dramatap.app/6/fc7c143444a547b2897b4b619fa2c294-1786834042786.jpg" alt="Love That Bites, Pain That Stays 2" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Love That Bites, Pain That St…</div>
+        <div class="m">38 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/38232/snakes-over-wolves-2" title="Snakes Over Wolves 2">
+        <span class="ph" data-t="Snakes Over Wolves 2"><img src="https://img.dramatap.app/6/0c2c873dff7d4c8b81d4a3dd08e94dc2-1787606509855.jpg" alt="Snakes Over Wolves 2" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Snakes Over Wolves 2</div>
+        <div class="m">34 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/27743/who-is-the-nobody-here" title="Who Is the Nobody Here">
+        <span class="ph" data-t="Who Is the Nobody Here"><img src="https://img.dramatap.app/6/293fd6d1c4f748fab11862a30e42c31e-1786840851877.jpg" alt="Who Is the Nobody Here" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Who Is the Nobody Here</div>
+        <div class="m">30 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/27683/an-asphyxiating-life" title="An Asphyxiating Life">
+        <span class="ph" data-t="An Asphyxiating Life"><img src="https://img.dramatap.app/6/faee27e0f7c249e7aad954f3662294c7-1786836982615.jpg" alt="An Asphyxiating Life" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">An Asphyxiating Life</div>
+        <div class="m">32 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Contract Marriage</h2><a class="sec-more" href="/tag/contract-marriage">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/27661/new-life-new-mate" title="New Life, New Mate">
+        <span class="ph" data-t="New Life, New Mate"><img src="https://img.dramatap.app/6/47db51f0dc3f47ed8d8e269d99a4beb9-1786843334287.jpg" alt="New Life, New Mate" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">New Life, New Mate</div>
+        <div class="m">32 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/29990/found-my-daddy-at-the-construction-site" title="Found My Daddy at the Construction Site">
+        <span class="ph" data-t="Found My Daddy at the Construction Site"><img src="https://img.dramatap.app/6/b282f54385c04df298ebc4eaa3613ec1-1786829042187.jpg" alt="Found My Daddy at the Construction Site" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Found My Daddy at the Constru…</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46390/after-my-divorce-i-became-the-mafia-don-s-wife" title="After My Divorce, I Became the Mafia Don’s Wife">
+        <span class="ph" data-t="After My Divorce, I Became the Mafia Don’s Wife"><img src="https://img.dramatap.app/6/1fc30ecccb534a00bbb47cb695731085-1786841556229.jpg" alt="After My Divorce, I Became the Mafia Don’s Wife" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">After My Divorce, I Became th…</div>
+        <div class="m">45 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/37331/my-second-turning-of-fate" title="My Second Turning of Fate">
+        <span class="ph" data-t="My Second Turning of Fate"><img src="https://img.dramatap.app/6/eab6c19a65cc45909ace20faf8156a42-1787434726426.jpg" alt="My Second Turning of Fate" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">My Second Turning of Fate</div>
+        <div class="m">51 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Divorce</h2><a class="sec-more" href="/tag/divorce">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/67841/the-100th-divorce-was-final" title="The 100th Divorce Was Final">
+        <span class="ph" data-t="The 100th Divorce Was Final"><img src="https://img.dramatap.app/6/7d75b4ad00bb4f49abb20b35d7f3e252-1786841179634.jpg" alt="The 100th Divorce Was Final" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The 100th Divorce Was Final</div>
+        <div class="m">60 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46535/burned-out-of-the-moretti-name" title="Burned Out of the Moretti Name">
+        <span class="ph" data-t="Burned Out of the Moretti Name"><img src="https://img.dramatap.app/6/80444e4c4e394933914f8111d97a1f13-1786835050639.jpg" alt="Burned Out of the Moretti Name" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Burned Out of the Moretti Name</div>
+        <div class="m">35 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46345/leave-me-and-raise-her-baby" title="Leave Me and Raise Her Baby">
+        <span class="ph" data-t="Leave Me and Raise Her Baby"><img src="https://img.dramatap.app/6/94ab13b504724924919d15862ee5350c-1786837984306.jpg" alt="Leave Me and Raise Her Baby" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Leave Me and Raise Her Baby</div>
+        <div class="m">31 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/46389/200-reasons-to-never-look-back" title="200 Reasons to Never Look Back">
+        <span class="ph" data-t="200 Reasons to Never Look Back"><img src="https://img.dramatap.app/6/d6ecc3232be140c79ba2d34583d262f1-1786843022759.jpg" alt="200 Reasons to Never Look Back" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">200 Reasons to Never Look Back</div>
+        <div class="m">37 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Secret Baby</h2><a class="sec-more" href="/tag/secret-baby">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/62009/the-devil-who-fell-for-an-angel" title="The Devil Who Fell For An Angel">
+        <span class="ph" data-t="The Devil Who Fell For An Angel"><img src="https://img.dramatap.app/12/052a22635e22488fb1c9f297bbb6a290-1786814837178.jpg" alt="The Devil Who Fell For An Angel" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Devil Who Fell For An Ang…</div>
+        <div class="m">45 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/61970/off-limits-i-want-my-bestie-s-young-son" title="Off-Limits: I Want My Bestie’s Young Son">
+        <span class="ph" data-t="Off-Limits: I Want My Bestie’s Young Son"><img src="https://img.dramatap.app/12/1b28557ea0994fb68c67598f5ead107c-1786814737343.jpg" alt="Off-Limits: I Want My Bestie’s Young Son" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Off-Limits: I Want My Bestie’…</div>
+        <div class="m">58 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/38260/i-gave-the-infertile-ceo-six-babies" title="I Gave the &quot;Infertile&quot; CEO Six Babies">
+        <span class="ph" data-t="I Gave the &quot;Infertile&quot; CEO Six Babies"><img src="https://img.dramatap.app/12/953e5aabece44810a23740359d35f136-1786814276071.jpg" alt="I Gave the &quot;Infertile&quot; CEO Six Babies" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">I Gave the &quot;Infertile&quot; CEO Si…</div>
+        <div class="m">66 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/83748/the-unborn-boss" title="The Unborn Boss">
+        <span class="ph" data-t="The Unborn Boss"><img src="https://img.dramatap.app/12/c3341071177d45cd9bd5586a4d07000e-1786819368160.jpg" alt="The Unborn Boss" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Unborn Boss</div>
+        <div class="m">30 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Vampire</h2><a class="sec-more" href="/tag/vampire">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/38648/the-name-she-wrote-in-blood" title="The Name She Wrote in Blood">
+        <span class="ph" data-t="The Name She Wrote in Blood"><img src="https://img.dramatap.app/6/0dd939f137b54148aa7ccf0a3ec4e625-1786839463690.jpg" alt="The Name She Wrote in Blood" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Name She Wrote in Blood</div>
+        <div class="m">40 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/20544/marry-vampire-king-after-rebirth" title="Marry Vampire King After Rebirth">
+        <span class="ph" data-t="Marry Vampire King After Rebirth"><img src="https://img.dramatap.app/6/92a75fc3570c42edb1b4bd043e915f60-1786836774951.jpg" alt="Marry Vampire King After Rebirth" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Marry Vampire King After Rebi…</div>
+        <div class="m">33 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/37617/fate-bound-reborn-for-the-vampire-king" title="Fate Bound: Reborn for the Vampire King">
+        <span class="ph" data-t="Fate Bound: Reborn for the Vampire King"><img src="https://img.dramatap.app/6/02b3ec2fe8a348518a1b8c31521006f3-1786827990237.jpg" alt="Fate Bound: Reborn for the Vampire King" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Fate Bound: Reborn for the Va…</div>
+        <div class="m">62 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/29965/marry-vampire-king-after-rebirth-2" title="Marry Vampire King After Rebirth 2">
+        <span class="ph" data-t="Marry Vampire King After Rebirth 2"><img src="https://img.dramatap.app/6/e3cc5debfa254a1a941da8821fc6ace4-1786827997992.jpg" alt="Marry Vampire King After Rebirth 2" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Marry Vampire King After Rebi…</div>
+        <div class="m">33 episodes</div>
+      </a></div>
+  </section>
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Alpha</h2><a class="sec-more" href="/tag/alpha">See all &rarr;</a>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_tag" href="/d/27642/the-last-gift" title="The Last Gift">
+        <span class="ph" data-t="The Last Gift"><img src="https://img.dramatap.app/6/cd8c78f3c2e443ea836a8f733bbc2139-1787605865364.jpg" alt="The Last Gift" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Last Gift</div>
+        <div class="m">32 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/40814/the-last-gift-2" title="The Last Gift 2">
+        <span class="ph" data-t="The Last Gift 2"><img src="https://img.dramatap.app/6/7bce7e41c8ad42979aeb2cd3e6f42bd9-1786836495212.jpg" alt="The Last Gift 2" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">The Last Gift 2</div>
+        <div class="m">32 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/28253/luna-reborn-alpha-s-second-chance" title="Luna Reborn: Alpha&#39;s Second Chance">
+        <span class="ph" data-t="Luna Reborn: Alpha&#39;s Second Chance"><img src="https://img.dramatap.app/6/2e7a134e6b7f47f7b3f39a03d1a6b392-1786834903051.jpg" alt="Luna Reborn: Alpha&#39;s Second Chance" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Luna Reborn: Alpha&#39;s Second C…</div>
+        <div class="m">62 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_tag" href="/d/27539/alpha-daddy-i-found-mommy" title="Alpha Daddy, I Found Mommy">
+        <span class="ph" data-t="Alpha Daddy, I Found Mommy"><img src="https://img.dramatap.app/6/d747914f3abf45d5989d348c6ccd0afd-1786831832978.jpg" alt="Alpha Daddy, I Found Mommy" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Alpha Daddy, I Found Mommy</div>
+        <div class="m">29 episodes</div>
+      </a></div>
+  </section>
+  
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2>Binge it tonight · 50 episodes or fewer</h2>
+    </div>
+    <div class="grid grid-home">
+      <a class="card ssr-card" data-from="home_short" href="/d/31154/when-my-ex-begs-the-wolf-king-claims-me-as-his-destiny" title="When My Ex Begs,the Wolf King Claims Me As His Destiny">
+        <span class="ph" data-t="When My Ex Begs,the Wolf King Claims Me As His Destiny"><img src="https://img.dramatap.app/29/213d4f17ba1541c4868797c14723b05b-1778671085580.png" alt="When My Ex Begs,the Wolf King Claims Me As His Destiny" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">When My Ex Begs,the Wolf King…</div>
+        <div class="m">15 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_short" href="/d/46383/after-rebirth-i-left-the-mate-who-once-died-for-me" title="After Rebirth, I Left the Mate Who Once Died for Me">
+        <span class="ph" data-t="After Rebirth, I Left the Mate Who Once Died for Me"><img src="https://img.dramatap.app/6/b66dfd99fd0c4a7f84a4d1ecbfea7ac8-1786839010816.jpg" alt="After Rebirth, I Left the Mate Who Once Died for Me" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">After Rebirth, I Left the Mat…</div>
+        <div class="m">32 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_short" href="/d/41277/mated-to-the-alpha-and-his-beta" title="Mated to the Alpha and His Beta">
+        <span class="ph" data-t="Mated to the Alpha and His Beta"><img src="https://img.dramatap.app/2/f8bd1352d48446bbbf4b0e7ae75497ae-1782226433047.jpg" alt="Mated to the Alpha and His Beta" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Mated to the Alpha and His Be…</div>
+        <div class="m">20 episodes</div>
+      </a>
+      <a class="card ssr-card" data-from="home_short" href="/d/32245/too-late-my-alpha" title="Too Late, My Alpha">
+        <span class="ph" data-t="Too Late, My Alpha"><img src="https://img.dramatap.app/6/76e6a5f9d97947fd844b7b7f6325de64-1779326835516.jpg" alt="Too Late, My Alpha" loading="lazy" width="300" height="400" onerror="this.parentNode.classList.add('bad')"></span>
+        <div class="t">Too Late, My Alpha</div>
+        <div class="m">47 episodes</div>
+      </a></div>
+  </section>
+
+  <section class="home-sec">
+    <div class="sec-hd">
+      <h2 id="explore-title">Browse by category</h2>
+      <a class="sec-more" id="explore-tags" href="/tags">All 500+ tags &rarr;</a>
+    </div>
+    <div class="chips">
+      <a class="chip" href="/tag/payback">Payback<span>397</span></a>
+      <a class="chip" href="/tag/underdog-rise">Underdog Rise<span>653</span></a>
+      <a class="chip" href="/tag/rebirth">Rebirth<span>373</span></a>
+      <a class="chip" href="/tag/ceo">CEO<span>535</span></a>
+      <a class="chip" href="/tag/mafia">Mafia<span>212</span></a>
+      <a class="chip" href="/tag/alpha">Alpha<span>43</span></a>
+      <a class="chip" href="/tag/contract-marriage">Contract Marriage<span>149</span></a>
+      <a class="chip" href="/tag/secret-baby">Secret Baby<span>69</span></a>
+      <a class="chip" href="/tag/heiress">Heiress<span>183</span></a>
+      <a class="chip" href="/tag/system">System<span>198</span></a>
+      <a class="chip" href="/tag/divorce">Divorce<span>144</span></a>
+      <a class="chip" href="/tag/vampire">Vampire<span>59</span></a></div>
+  </section>
+
+  <section class="home-sec">
+    <h2 id="how-title">How it works</h2>
+    <div class="steps">
+      <div class="step"><div class="step-ic">1</div><b id="how-1t">Search</b>: <span id="how-1d">type a title or trope</span></div>
+      <div class="step"><div class="step-ic">2</div><b id="how-2t">Pick an episode</b>: <span id="how-2d">every episode is free</span></div>
+      <div class="step"><div class="step-ic">3</div><b id="how-3t">Watch</b>: <span id="how-3d">plays in your browser — no app, no signup</span></div>
+    </div>
+  </section>
+</div>
+
+<footer class="site-foot">
+  <a href="/new">New</a><a href="/browse">Browse</a><a href="/tags">Categories</a><a href="/vip">VIP</a><a href="/pricing">Pricing</a><a href="/sitemap.xml">Sitemap</a>
+  <!-- 合规四件套：广告网络审核第一眼就找页脚，缺一个就可能被判不合规 -->
+  <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/dmca">DMCA</a><a href="/contact">Contact</a>
+  <a href="mailto:contact@dramatap.app">Support: contact@dramatap.app</a>
+  <span>&copy; DramaTap</span>
+</footer>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+  <div class="box">
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2 id="mtitle"></h2>
+    <div id="mmeta" class="meta"></div>
+    <div id="eps" class="eps"></div>
+    <p class="hint" id="epshint"></p>
+  </div>
+</div>
+
+<div id="player">
+  <video id="video" playsinline></video>
+  <div id="tapzone"></div>
+  <div class="pbar">
+    <div class="ptitle" id="ptitle"></div>
+    <span role="button" onclick="closePlayer()">✕</span>
+  </div>
+  <div class="nav">
+    <button id="prev" onclick="step(-1)">← Prev</button>
+    <button id="epbtn" class="epbtn" onclick="toggleSheet()"></button>
+    <button id="next" onclick="step(1)">Next →</button>
+  </div>
+  <div id="pg"><div class="track"><div class="fill" id="pgfill"></div><div class="knob" id="pgknob"></div></div></div>
+  <div id="ploading"><i></i></div>
+  <!-- onclick 内联去掉了：抢跑被拦时这颗 ▶ 就已经挂出来，而 resumePlay 长在主脚本里，
+       那会儿还没定义，点一下先抛一个 ReferenceError（抢跑自绑的监听器照跑，所以能播，
+       但转圈收不掉、控制台一片红）。改由主脚本 addEventListener 统一绑。 -->
+  <div id="tapplay"><i>▶</i><b>Tap to play</b></div>
+  <div id="unmute"><span>🔇</span> Tap for sound</div>
+  <div id="perr"></div>
+  <!-- VIP 专属剧的闸门。文案由 vip-gate.js 按集号填，卡片外不吃点击：
+       底部的上一集/选集和顶栏 ✕ 照常够得着 -->
+  <div id="pvip">
+    <div class="pvip-card">
+      <b id="pvip-t"></b>
+      <p id="pvip-s"></p>
+      <button id="pvip-go" class="pvip-go">Unlock with VIP</button>
+      <button id="pvip-x" class="pvip-x">Not now</button>
+    </div>
+  </div>
+  <div id="autonext">
+    <div class="box">
+      <div class="lb" id="an-lb"></div>
+      <div class="n" id="an-n">3</div>
+      <button class="go" id="an-go" onclick="step(1)"></button>
+    </div>
+  </div>
+  <div id="finish">
+    <div class="box">
+      <div class="done" id="fin-done"></div>
+      <div class="cards" id="fin-cards"></div>
+      <button class="cancel" id="fin-cancel" onclick="autonextStop()"></button>
+    </div>
+  </div>
+  <div id="sheetmask" onclick="closeSheet()"></div>
+  <div id="epsheet">
+    <div class="sheet-hd">
+      <span id="sheettitle"></span>
+      <span role="button" onclick="closeSheet()">✕</span>
+    </div>
+    <div class="sheet-seg" id="sheetseg" hidden></div>
+    <div class="sheet-bd">
+      <div id="sheeteps" class="eps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 都不加 defer：位置在 body 末尾，DOM 已经建好，执行时机跟原来内联那份完全一样。
+     试过给两个都加 defer（想让 414KB 的 hls.min.js 不阻塞解析），
+     本地连点 Next 换集会间歇性卡在 loadstart 不出 loadedmetadata，8 连跳挂 4 次；
+     去掉就稳定。省下的那点解析时间不值得拿播放稳定性换。 -->
+<script src="/hls.min.js"></script>
+<script src="/app.js?v=0a488c54-60a9-488a-848b-12edc3a49418"></script>
+</body>
+</html>

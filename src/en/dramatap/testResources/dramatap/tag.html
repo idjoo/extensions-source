@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6c5ce7">
+<!-- FlickReels 切片同时带 Origin 和 Referer 就 403（除第 1 段），其他片源不发 Referer 也都放行 -->
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- 下面这段会被 SSR 整块替换；图标和 theme-color 每页都要，所以留在区外。
+     canonical 必须在区内：漏在区外的话，详情页会同时带自己的和首页的两个 canonical。 -->
+<title>Revenge Short Dramas — Watch Free Online | DramaTap</title>
+<meta name="description" content="Browse and stream popular Revenge short dramas free online on DramaTap. Watch 1218 series directly in your browser with no app download needed.">
+<link rel="canonical" href="https://dramatap.app/tag/revenge">
+<meta property="og:site_name" content="dramatap">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Revenge Short Dramas — Watch Free Online | DramaTap">
+<meta property="og:description" content="Browse and stream popular Revenge short dramas free online on DramaTap. Watch 1218 series directly in your browser with no app download needed.">
+<meta property="og:url" content="https://dramatap.app/tag/revenge">
+<meta property="og:image" content="https://dramatap.app/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Revenge Short Dramas — Watch Free Online | DramaTap">
+<meta name="twitter:description" content="Browse and stream popular Revenge short dramas free online on DramaTap. Watch 1218 series directly in your browser with no app download needed.">
+<meta name="twitter:image" content="https://dramatap.app/og-cover.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://dramatap.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tags",
+      "item": "https://dramatap.app/tags"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Revenge Short Dramas",
+      "item": "https://dramatap.app/tag/revenge"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Revenge Short Dramas",
+  "url": "https://dramatap.app/tag/revenge",
+  "description": "Browse and stream popular Revenge short dramas free online on DramaTap. Watch 1218 series directly in your browser with no app download needed."
+}
+</script>
+<style>
+.ssr-page-hero { max-width: 980px; margin: 0 auto 12px; padding: 20px 16px 0; text-align: center; }
+.ssr-page-hero h1 { font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 6px; }
+.ssr-page-hero .sub { color: #8b909a; font-size: 14px; }
+.ssr-card { text-decoration: none; color: inherit; display: block; }
+.ssr-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: 980px; margin: 24px auto 16px; padding: 0 16px; }
+.ssr-page-btn { min-width: 38px; height: 38px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #2a2f3a; border-radius: 8px; background: #1a1d24; color: #e8eaed; text-decoration: none; font-size: 14px; transition: all .15s; box-sizing: border-box; }
+.ssr-page-btn:not(.disabled):not(.cur):hover { border-color: #6c5ce7; color: #fff; background: #232733; }
+.ssr-page-btn.cur { background: #6c5ce7; border-color: #6c5ce7; color: #fff; font-weight: 600; cursor: default; }
+.ssr-page-btn.disabled { opacity: .35; pointer-events: none; color: #8b909a; }
+.ssr-page-dots { padding: 0 4px; color: #8b909a; font-size: 14px; }
+</style>
+<link rel="preconnect" href="https://img.dramatap.app">
+<link rel="stylesheet" href="/app.css?v=0a488c54-60a9-488a-848b-12edc3a49418">
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <a class="brand" href="/" aria-label="DramaTap home">
+      <span class="brand-name"><img src="/icon-192.png" alt="" width="26" height="26">DramaTap</span>
+    </a>
+    <nav class="hnav" aria-label="Site">
+      <a href="/new" id="nav-new">New</a>
+      <a href="/browse" id="nav-browse">Browse</a>
+      <a href="/tags" id="nav-tags">Tags</a>
+      <!-- 两个都渲染、都先藏着，由 vip.js 按会员状态挑一个显示。
+           不能在服务端按身份选：导航在外壳里，全站页面共用同一份边缘缓存。 -->
+      <a href="/vip" id="nav-vip" class="nav-vip" hidden>VIP</a>
+      <a href="/vip" id="nav-getvip" hidden>VIP</a>
+    </nav>
+  </div>
+</header>
+
+
+
+<div class="ssr-page-hero">
+  <h1>Revenge Short Dramas</h1>
+  <div class="sub">Watch 1218 Revenge short dramas free online in your browser</div>
+</div>
+
+<div class="searchbar">
+  <!-- 这句英文和下面 i18n 的 search_ph.en 是同一份文案的两处副本，改一处必须改另一处：
+       这里是 JS 起来之前（含爬虫、JS 挂掉时）显示的那份，i18n 那份管切回英文。
+       都得短——手机端输入框只有 215px 可用宽，长文案会被截成残句。 -->
+  <input id="q" placeholder="Search any drama or tag">
+  <button id="searchbtn" onclick="search()">Search</button>
+</div>
+
+<!-- 继续观看。内容按 localStorage 填，服务端一个字都不渲染：
+     首页 HTML 是全站共用的边缘缓存，按人不同的东西只能在客户端出。
+     夹在搜索框和结果容器之间：搜索一开始整块就藏了（见 search.js），不会挡住下面的结果。
+     写在 SSR 区段之外，非首页那几页留着它但永远是空的。
+     由紧跟的内联脚本在解析时画出：等 app.js 再插，首页已经显示了，整页会被往下推。
+     它跟 history.js 的 cwRender/cwCardHtml 是同一份模板的两处副本，改一处必须改另一处。 -->
+<div id="cw" hidden></div>
+<script>
+(() => {
+  if (location.pathname !== '/') return;
+  let l;
+  try { l = JSON.parse(localStorage.getItem('dt_hist') || '[]'); } catch (e) { return; }
+  if (!Array.isArray(l)) return;
+  l = l.filter(x => x && x.i && x.e);
+  if (!l.length) return;
+  const esc = s => String(s).replace(/[<>&"']/g, c =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]));
+  const card = (d, pos) => {
+    const t = esc(d.t || 'Drama ' + d.i);
+    return `<a class="card cw-card" href="/d/${d.i}${d.s ? '/' + d.s : ''}" data-id="${d.i}" data-ep="${esc(d.e)}" data-pos="${pos}">` +
+      `<span class="ph${d.c ? '' : ' bad'}" data-t="${t}">${d.c ? `<img src="${esc(d.c)}" alt="" loading="lazy" onerror="this.parentNode.classList.add('bad')">` : ''}</span>` +
+      `<div class="t">${t}</div><div class="m">EP ${esc(d.e)}</div></a>`;
+  };
+  const box = document.getElementById('cw');
+  box.innerHTML = `<div class="sec-hd"><h2>Continue watching</h2><a class="sec-more cw-all" href="/history">See all &rarr;</a></div>` +
+    `<div class="grid grid-home">${l.slice(0, 4).map(card).join('')}</div>`;
+  box.hidden = false;
+})();
+</script>
+
+<!-- 结果容器必须紧跟搜索框：SSR 首页会把下面 SSR_HOME 整段换成真正的首页内容，
+     排在它后面的话搜完得翻过整个首页才看得到结果 -->
+<div id="status" class="status"></div>
+<div id="grid" class="grid"></div>
+<div id="suggest" hidden>
+  <div class="suggest-hd" id="suggest-hd">You might like</div>
+  <div id="suggest-grid" class="grid"></div>
+</div>
+
+<!-- SSR 页被上面这个搜索块劈成两段，分派规则见 worker/src/index.js 的 inject() -->
+
+
+<section class="new-row">
+  <div class="sec-hd">
+    <h2>New in Revenge</h2>
+    <a class="sec-more" href="/new">See all new &rarr;</a>
+  </div>
+  <div class="grid grid-new">
+    
+    <a class="card ssr-card" data-from="tag_new" href="/d/140722/fake-play" title="Fake Play">
+      <span class="ph" data-t="Fake Play"><img src="https://img.dramatap.app/fix/140722.webp" alt="Fake Play" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Fake Play</div>
+      <div class="m">EP82 TV</div>
+    </a>
+    <a class="card ssr-card" data-from="tag_new" href="/d/140526/the-blind-outcast-is-the-supreme-godfather" title="THE BLIND OUTCAST IS THE SUPREME GODFATHER">
+      <span class="ph" data-t="THE BLIND OUTCAST IS THE SUPREME GODFATHER"><img src="https://img.dramatap.app/fix/140526.webp" alt="THE BLIND OUTCAST IS THE SUPREME GODFATHER" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">THE BLIND OUTCAST IS THE SUPREME GODFATHER</div>
+      <div class="m">EP62 TV</div>
+    </a>
+    <a class="card ssr-card" data-from="tag_new" href="/d/2000002/broken-bond-true-alpha" title="Broken Bond, True Alpha">
+      <span class="ph" data-t="Broken Bond, True Alpha"><img src="https://img.dramatap.app/extra/2000002.webp" alt="Broken Bond, True Alpha" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Broken Bond, True Alpha</div>
+      <div class="m">EP45 TV</div>
+    </a>
+    <a class="card ssr-card" data-from="tag_new" href="/d/2000006/the-prince-s-sweet-little-cinderella" title="The Prince&#39;s Sweet Little Cinderella">
+      <span class="ph" data-t="The Prince&#39;s Sweet Little Cinderella"><img src="https://img.dramatap.app/extra/2000006.webp" alt="The Prince&#39;s Sweet Little Cinderella" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Prince&#39;s Sweet Little Cinderella</div>
+      <div class="m">EP60 TV</div>
+    </a>
+    <a class="card ssr-card" data-from="tag_new" href="/d/2000017/the-supreme-alpha-s-substitute-luna" title="The Supreme Alpha&#39;s Substitute Luna">
+      <span class="ph" data-t="The Supreme Alpha&#39;s Substitute Luna"><img src="https://img.dramatap.app/extra/2000017.webp" alt="The Supreme Alpha&#39;s Substitute Luna" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Supreme Alpha&#39;s Substitute Luna</div>
+      <div class="m">EP34 TV</div>
+    </a>
+    <a class="card ssr-card" data-from="tag_new" href="/d/2000025/my-ex-s-girl-best-friend-got-him-i-married-the-don" title="My Ex&#39;s Girl Best Friend Got Him, I Married the Don">
+      <span class="ph" data-t="My Ex&#39;s Girl Best Friend Got Him, I Married the Don"><img src="https://img.dramatap.app/extra/2000025.webp" alt="My Ex&#39;s Girl Best Friend Got Him, I Married the Don" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">My Ex&#39;s Girl Best Friend Got Him, I Married the Don</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  </div>
+</section>
+<div class="grid">
+  
+    <a class="card ssr-card" href="/d/31385/a-breath-away-from-death">
+      <span class="ph" data-t="A Breath Away from Death"><img src="https://img.dramatap.app/6/ad1ca0ab350940128e1cf89ec9041c45-1786829153167.jpg" alt="A Breath Away from Death" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">A Breath Away from Death</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/24853/fragrance-against-the-wind">
+      <span class="ph" data-t="FRAGRANCE AGAINST THE WIND"><img src="https://img.dramatap.app/29/98d89ee5a4ef4f36969bd6ac5e73b4a5-1776943052688.jpg" alt="FRAGRANCE AGAINST THE WIND" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">FRAGRANCE AGAINST THE WIND</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43219/he-suppressed-our-bond-seven-times-the-eighth-time-i-broke-it">
+      <span class="ph" data-t="He Suppressed Our Bond Seven Times, the Eighth Time I Broke It"><img src="https://img.dramatap.app/6/0b678be1355d4a4bb146873c0605e9bc-1787605907078.jpg" alt="He Suppressed Our Bond Seven Times, the Eighth Time I Broke It" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">He Suppressed Our Bond Seven Times, the Eighth Time I Broke It</div>
+      <div class="m">EP35 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/46509/after-the-crash">
+      <span class="ph" data-t="After the Crash"><img src="https://img.dramatap.app/6/c557af70f72e413d99994602c17ecf29-1786838308301.jpg" alt="After the Crash" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">After the Crash</div>
+      <div class="m">EP31 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/26693/after-amnesia-i-no-longer-serve-as-a-cash-cow-for-men">
+      <span class="ph" data-t="After amnesia: I no longer serve as a cash cow for men"><img src="https://img.dramatap.app/34/d369d771384c49719a9a0b88337cde7e-1777265512348.jpg" alt="After amnesia: I no longer serve as a cash cow for men" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">After amnesia: I no longer serve as a cash cow for men</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/39207/he-sucks-my-blood-i-suck-his-life">
+      <span class="ph" data-t="He Sucks My Blood，I Suck His Life"><img src="https://img.dramatap.app/6/0f6b97f56d814d319870be750e2fd1ae-1786842234774.jpg" alt="He Sucks My Blood，I Suck His Life" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">He Sucks My Blood，I Suck His Life</div>
+      <div class="m">EP32 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/60869/the-mafia-s-forgotten-wife-pregnant-and-abandoned">
+      <span class="ph" data-t="The Mafia’s Forgotten Wife: Pregnant and Abandoned"><img src="https://img.dramatap.app/6/8a0e24a83ae044c88e6dfae5ef58fd4c-1786845054656.jpg" alt="The Mafia’s Forgotten Wife: Pregnant and Abandoned" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Mafia’s Forgotten Wife: Pregnant and Abandoned</div>
+      <div class="m">EP34 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43200/the-empire-i-chose-over-love">
+      <span class="ph" data-t="The Empire I Chose Over Love"><img src="https://img.dramatap.app/6/387982bf4e3c4345b28d85490dbf0ca7-1786840723406.jpg" alt="The Empire I Chose Over Love" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Empire I Chose Over Love</div>
+      <div class="m">EP35 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/21455/alpha-s-betrayal-my-revenge">
+      <span class="ph" data-t="Alpha&#39;s Betrayal, My Revenge"><img src="https://img.dramatap.app/6/886db3d54ed3468cb7ee20fb087155b0-1786841148433.jpg" alt="Alpha&#39;s Betrayal, My Revenge" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Alpha&#39;s Betrayal, My Revenge</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/22960/clara-s-redemption">
+      <span class="ph" data-t="Clara&#39;s Redemption"><img src="https://img.dramatap.app/29/2017d14195184a64bb5d8ff68497a71d-1776684074912.png" alt="Clara&#39;s Redemption" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Clara&#39;s Redemption</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/26584/scumbag-rings-the-bell-for-his-ipo-while-a-wall-street-heiress-shorts-his-stock">
+      <span class="ph" data-t="Scumbag rings the bell for his IPO,While a Wall Street heiress shorts his stock instead"><img src="https://img.dramatap.app/34/86a2e88d03bb442c922f65dc5ec0f1d7-1777264404787.png" alt="Scumbag rings the bell for his IPO,While a Wall Street heiress shorts his stock instead" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Scumbag rings the bell for his IPO,While a Wall Street heiress shorts his stock instead</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/46345/leave-me-and-raise-her-baby">
+      <span class="ph" data-t="Leave Me and Raise Her Baby"><img src="https://img.dramatap.app/6/94ab13b504724924919d15862ee5350c-1786837984306.jpg" alt="Leave Me and Raise Her Baby" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Leave Me and Raise Her Baby</div>
+      <div class="m">EP31 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/27685/found-a-homeless-genius-to-save-my-company">
+      <span class="ph" data-t="Found A Homeless Genius To Save My Company"><img src="https://img.dramatap.app/6/66d565c9dcb4421f95c8776b152e30a1-1786828929478.jpg" alt="Found A Homeless Genius To Save My Company" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Found A Homeless Genius To Save My Company</div>
+      <div class="m">EP59 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/14742/alpha-s-abandoned-luna">
+      <span class="ph" data-t="Alpha&#39;s Abandoned Luna"><img src="https://img.dramatap.app/6/ec0afe23ae274966ab5c192e29d79cb3-1786840626024.jpg" alt="Alpha&#39;s Abandoned Luna" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Alpha&#39;s Abandoned Luna</div>
+      <div class="m">EP36 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/23044/captain-down-on-his-knees">
+      <span class="ph" data-t="Captain,Down On His Knees"><img src="https://img.dramatap.app/30/39a4902d233842a3824c01409cd11995-1776685271205.png" alt="Captain,Down On His Knees" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Captain,Down On His Knees</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43212/the-ex-s-wedding-gift">
+      <span class="ph" data-t="The Ex’s Wedding Gift"><img src="https://img.dramatap.app/6/8b6c108493fb4658802adf94b441a7af-1786836183462.jpg" alt="The Ex’s Wedding Gift" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Ex’s Wedding Gift</div>
+      <div class="m">EP74 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/27743/who-is-the-nobody-here">
+      <span class="ph" data-t="Who Is the Nobody Here"><img src="https://img.dramatap.app/6/293fd6d1c4f748fab11862a30e42c31e-1786840851877.jpg" alt="Who Is the Nobody Here" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Who Is the Nobody Here</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/40823/alpha-twins-regret-after-choosing-their-stepsister">
+      <span class="ph" data-t="Alpha Twins Regret After Choosing Their Stepsister"><img src="https://img.dramatap.app/6/ca63fd9ecbcc4c2395ef6ae6bd7b722b-1786832618797.jpg" alt="Alpha Twins Regret After Choosing Their Stepsister" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Alpha Twins Regret After Choosing Their Stepsister</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/17523/my-big-sister-strikes-with-her-mafia-dynasty">
+      <span class="ph" data-t="My Big Sister Strikes with Her Mafia Dynasty"><img src="https://img.dramatap.app/6/2c3dfe0dd045407f945f1357f3fdaad6-1786839937409.jpg" alt="My Big Sister Strikes with Her Mafia Dynasty" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">My Big Sister Strikes with Her Mafia Dynasty</div>
+      <div class="m">EP56 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/38225/too-late-my-ex-i-belong-to-the-dragon-king-now">
+      <span class="ph" data-t="Too Late, My Ex—I Belong to the Dragon King Now"><img src="https://img.dramatap.app/6/5acd9202a2eb49498715a31a18c34680-1786839864150.jpg" alt="Too Late, My Ex—I Belong to the Dragon King Now" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Too Late, My Ex—I Belong to the Dragon King Now</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/26743/reborne-again-i-built-my-careers-by-writing-short-dramas">
+      <span class="ph" data-t="REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS"><img src="https://img.dramatap.app/34/d39e6b797ab04f3ba4943e3c9abbe37a-1777266165435.png" alt="REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">REBORNE AGAIN I BUILT MY CAREERS BY WRITING SHORT DRAMAS</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/61968/after-erasing-his-identity-the-ceo-wife-goes-crazy">
+      <span class="ph" data-t="After Erasing His Identity, The CEO Wife Goes Crazy"><img src="https://img.dramatap.app/12/2fb725b4ca2f46458eaaabc96e4440a6-1787029087535.jpg" alt="After Erasing His Identity, The CEO Wife Goes Crazy" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">After Erasing His Identity, The CEO Wife Goes Crazy</div>
+      <div class="m">EP36 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/26688/the-perfect-revenge-of-a-wife">
+      <span class="ph" data-t="The Perfect Revenge of a Wife"><img src="https://img.dramatap.app/34/b5ab3976bd5544f3891353ac58a99819-1777265486953.jpg" alt="The Perfect Revenge of a Wife" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Perfect Revenge of a Wife</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43205/my-second-life-with-the-broken-winged-angel">
+      <span class="ph" data-t="My Second Life with the Broken-Winged Angel"><img src="https://img.dramatap.app/6/c926f34d3bfc479ea3b06fe1527592d1-1786831700496.jpg" alt="My Second Life with the Broken-Winged Angel" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">My Second Life with the Broken-Winged Angel</div>
+      <div class="m">EP32 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/61654/the-trash-heiress-is-a-dragon-master">
+      <span class="ph" data-t="The Trash Heiress Is A Dragon Master"><img src="https://img.dramatap.app/6/674632012c954df5acc594728570dc76-1786835290189.jpg" alt="The Trash Heiress Is A Dragon Master" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Trash Heiress Is A Dragon Master</div>
+      <div class="m">EP61 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/40810/baby-bump-vs-bomb-watching-him-go-mad">
+      <span class="ph" data-t="Baby Bump vs Bomb: Watching Him Go Mad"><img src="https://img.dramatap.app/6/d6c588463ff5464b9c4e5e72126dfdde-1786835162954.jpg" alt="Baby Bump vs Bomb: Watching Him Go Mad" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Baby Bump vs Bomb: Watching Him Go Mad</div>
+      <div class="m">EP32 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/41371/sold-to-the-mafia-queen">
+      <span class="ph" data-t="Sold to the Mafia Queen"><img src="https://img.dramatap.app/21/87ef141bdb8f4a90adec13fb3cf5b3c7-1782294153172.png" alt="Sold to the Mafia Queen" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Sold to the Mafia Queen</div>
+      <div class="m">EP51 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/27469/reborn-for-revenge-i-went-mad">
+      <span class="ph" data-t="Reborn for Revenge, I Went Mad"><img src="https://img.dramatap.app/6/52e7752993d343aa8be4eaa3c0e1c93d-1786843012364.jpg" alt="Reborn for Revenge, I Went Mad" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Reborn for Revenge, I Went Mad</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/94225/my-angel-my-desire">
+      <span class="ph" data-t="My angel, my desire"><img src="https://img.dramatap.app/46/ce77a6b8b49945afb74917bdd4c55392-1788338069065.jpg" alt="My angel, my desire" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">My angel, my desire</div>
+      <div class="m">EP40 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/46552/the-prison-queen-comes-for-blood">
+      <span class="ph" data-t="The Prison Queen Comes for Blood"><img src="https://img.dramatap.app/6/9ef04a6b0843473ba10c326d7a14f099-1786836999942.jpg" alt="The Prison Queen Comes for Blood" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Prison Queen Comes for Blood</div>
+      <div class="m">EP51 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/44130/the-undead-and-unstoppable-apocalyptic-queen">
+      <span class="ph" data-t="The Undead and Unstoppable Apocalyptic Queen"><img src="https://img.dramatap.app/46/ed1ebb47078b41f887a3b12e3b89a2f9-1783261015666.jpg" alt="The Undead and Unstoppable Apocalyptic Queen" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Undead and Unstoppable Apocalyptic Queen</div>
+      <div class="m">EP33 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/36347/i-m-done-being-a-yes-girl">
+      <span class="ph" data-t="I&#39;m Done Being A Yes Girl"><img src="https://img.dramatap.app/12/ebbbb43f6b51483ca6322db3df354c03-1786814164962.jpg" alt="I&#39;m Done Being A Yes Girl" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">I&#39;m Done Being A Yes Girl</div>
+      <div class="m">EP56 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/42070/on-the-day-of-the-broken-engagement-i-married-a-half-blood-dragon">
+      <span class="ph" data-t="On the Day of the Broken Engagement, I Married a Half-Blood Dragon"><img src="https://img.dramatap.app/2/225fd1bb65974eb6889b30526303e1d8-1782831817661.jpg" alt="On the Day of the Broken Engagement, I Married a Half-Blood Dragon" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">On the Day of the Broken Engagement, I Married a Half-Blood Dragon</div>
+      <div class="m">EP28 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/35973/your-concubine-i-m-his-empress-now">
+      <span class="ph" data-t="Your Concubine? I&#39;m His Empress Now"><img src="https://img.dramatap.app/12/3366cdf11ebd4eb2bd0af06b2babf743-1786813583282.jpg" alt="Your Concubine? I&#39;m His Empress Now" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Your Concubine? I&#39;m His Empress Now</div>
+      <div class="m">EP69 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/30965/bye-loser-husband">
+      <span class="ph" data-t="Bye Loser Husband"><img src="https://img.dramatap.app/6/0072368161844786a574cce3c509cf0e-1786842300928.jpg" alt="Bye Loser Husband" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Bye Loser Husband</div>
+      <div class="m">EP60 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/42074/i-called-the-police-this-time">
+      <span class="ph" data-t="I Called the Police This Time"><img src="https://img.dramatap.app/2/2c33c4503c1b4619a75ae353935ba969-1782831881831.jpg" alt="I Called the Police This Time" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">I Called the Police This Time</div>
+      <div class="m">EP27 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/22953/pregnant-by-my-ex-s-wallstreet-billionaire-dad">
+      <span class="ph" data-t="PREGNANT BY MY EX&#39;S WALLSTREET BILLIONAIRE DAD"><img src="https://img.dramatap.app/29/ea6c3eb5f9a647829014e63a096c1ec7-1776683977121.png" alt="PREGNANT BY MY EX&#39;S WALLSTREET BILLIONAIRE DAD" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">PREGNANT BY MY EX&#39;S WALLSTREET BILLIONAIRE DAD</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/27701/choosing-the-right-one">
+      <span class="ph" data-t="Choosing the Right One"><img src="https://img.dramatap.app/6/c1b9351be05248a5a059230014568cb7-1786843309755.jpg" alt="Choosing the Right One" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Choosing the Right One</div>
+      <div class="m">EP34 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43229/the-forensic-queen-s-deadly-game">
+      <span class="ph" data-t="The Forensic Queen&#39;s Deadly Game"><img src="https://img.dramatap.app/6/6c8b64afa59645ca9bdfabd02400ab1e-1786839914763.jpg" alt="The Forensic Queen&#39;s Deadly Game" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">The Forensic Queen&#39;s Deadly Game</div>
+      <div class="m">EP50 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/2876/30-days-till-i-marry-my-husband-s-nemesis">
+      <span class="ph" data-t="30 Days Till I Marry My Husband&#39;s Nemesis"><img src="https://img.dramatap.app/2/d27c4f3b93f143b696dfc99deae3ca2c-1775394412758.jpg" alt="30 Days Till I Marry My Husband&#39;s Nemesis" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">30 Days Till I Marry My Husband&#39;s Nemesis</div>
+      <div class="m">EP70 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/26655/grace-of-raising-me-runs-deep-as-the-sea">
+      <span class="ph" data-t="GRACE OF RAISING ME RUNS DEEP AS THE SEA"><img src="https://img.dramatap.app/34/33bc28074a444789be82201eddf12bdf-1777265206102.png" alt="GRACE OF RAISING ME RUNS DEEP AS THE SEA" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">GRACE OF RAISING ME RUNS DEEP AS THE SEA</div>
+      <div class="m">EP83 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/61978/mistaken-love-regret-comes-too-late">
+      <span class="ph" data-t="Mistaken Love: Regret Comes Too Late"><img src="https://img.dramatap.app/12/a6af6b73c98a4f8ab7df381e5898454d-1786814760306.jpg" alt="Mistaken Love: Regret Comes Too Late" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Mistaken Love: Regret Comes Too Late</div>
+      <div class="m">EP49 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/14398/victory-is-in-hand">
+      <span class="ph" data-t="Victory is in Hand"><img src="https://img.dramatap.app/6/c00364e0606c4029a4c11e80a10d8d4e-1786828135381.jpg" alt="Victory is in Hand" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Victory is in Hand</div>
+      <div class="m">EP70 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/61886/somewhere-love-went-up-in-flames">
+      <span class="ph" data-t="Somewhere Love Went Up In Flames"><img src="https://img.dramatap.app/12/5bf44ea6a90843f593e15bbc0b97d12b-1786814533212.jpg" alt="Somewhere Love Went Up In Flames" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Somewhere Love Went Up In Flames</div>
+      <div class="m">EP52 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/43202/a-breath-away-from-death-2">
+      <span class="ph" data-t="A Breath Away from Death 2"><img src="https://img.dramatap.app/6/47d2de64425448d2a46a547f07709fa4-1787607008702.jpg" alt="A Breath Away from Death 2" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">A Breath Away from Death 2</div>
+      <div class="m">EP30 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/25641/she-painted-the-world">
+      <span class="ph" data-t="She Painted the World"><img src="https://img.dramatap.app/29/54697f177288493bb54f0e4d45bdb807-1777029489618.png" alt="She Painted the World" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">She Painted the World</div>
+      <div class="m">EP15 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/13741/assemble-my-avenging-billionaires">
+      <span class="ph" data-t="Assemble My Avenging Billionaires"><img src="https://img.dramatap.app/6/0dcbe1dfec3a46b181166dcd911011f3-1786832139375.jpg" alt="Assemble My Avenging Billionaires" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Assemble My Avenging Billionaires</div>
+      <div class="m">EP70 TV</div>
+    </a>
+  
+    <a class="card ssr-card" href="/d/2457/your-husband-is-mine">
+      <span class="ph" data-t="Your Husband Is Mine"><img src="https://img.dramatap.app/2/b80ae97f54b54ca6a464d70f559ee35a-1775393623428.jpg" alt="Your Husband Is Mine" loading="lazy" onerror="this.parentNode.classList.add('bad')"></span>
+      <div class="t">Your Husband Is Mine</div>
+      <div class="m">EP74 TV</div>
+    </a>
+  
+</div>
+
+<nav class="ssr-pagination" aria-label="Pagination">
+  <span class="ssr-page-btn disabled">‹ Prev</span>
+  <span class="ssr-page-btn cur">1</span>
+  <a class="ssr-page-btn" href="/tag/revenge/2">2</a>
+  <a class="ssr-page-btn" href="/tag/revenge/3">3</a>
+  <span class="ssr-page-dots">…</span>
+  <a class="ssr-page-btn" href="/tag/revenge/26">26</a>
+  <a class="ssr-page-btn" href="/tag/revenge/2">Next ›</a>
+</nav>
+<nav class="ssr-pagination ssr-jump" aria-label="Jump to page" style="opacity:.7;font-size:13px">
+  <span class="ssr-page-dots">Jump to</span>
+  <a class="ssr-page-btn" href="/tag/revenge/6">6</a>
+  <a class="ssr-page-btn" href="/tag/revenge/9">9</a>
+  <a class="ssr-page-btn" href="/tag/revenge/12">12</a>
+  <a class="ssr-page-btn" href="/tag/revenge/14">14</a>
+  <a class="ssr-page-btn" href="/tag/revenge/17">17</a>
+  <a class="ssr-page-btn" href="/tag/revenge/20">20</a>
+  <a class="ssr-page-btn" href="/tag/revenge/23">23</a>
+</nav>
+<div style="text-align:center; margin: 20px 0 40px;">
+  <a href="/tags" style="color:#6c5ce7; text-decoration:none; font-size:14px;">Browse all categories →</a>
+</div>
+
+
+
+<footer class="site-foot">
+  <a href="/new">New</a><a href="/browse">Browse</a><a href="/tags">Categories</a><a href="/vip">VIP</a><a href="/pricing">Pricing</a><a href="/sitemap.xml">Sitemap</a>
+  <!-- 合规四件套：广告网络审核第一眼就找页脚，缺一个就可能被判不合规 -->
+  <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/dmca">DMCA</a><a href="/contact">Contact</a>
+  <a href="mailto:contact@dramatap.app">Support: contact@dramatap.app</a>
+  <span>&copy; DramaTap</span>
+</footer>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+  <div class="box">
+    <span class="close" onclick="closeModal()">✕</span>
+    <h2 id="mtitle"></h2>
+    <div id="mmeta" class="meta"></div>
+    <div id="eps" class="eps"></div>
+    <p class="hint" id="epshint"></p>
+  </div>
+</div>
+
+<div id="player">
+  <video id="video" playsinline></video>
+  <div id="tapzone"></div>
+  <div class="pbar">
+    <div class="ptitle" id="ptitle"></div>
+    <span role="button" onclick="closePlayer()">✕</span>
+  </div>
+  <div class="nav">
+    <button id="prev" onclick="step(-1)">← Prev</button>
+    <button id="epbtn" class="epbtn" onclick="toggleSheet()"></button>
+    <button id="next" onclick="step(1)">Next →</button>
+  </div>
+  <div id="pg"><div class="track"><div class="fill" id="pgfill"></div><div class="knob" id="pgknob"></div></div></div>
+  <div id="ploading"><i></i></div>
+  <!-- onclick 内联去掉了：抢跑被拦时这颗 ▶ 就已经挂出来，而 resumePlay 长在主脚本里，
+       那会儿还没定义，点一下先抛一个 ReferenceError（抢跑自绑的监听器照跑，所以能播，
+       但转圈收不掉、控制台一片红）。改由主脚本 addEventListener 统一绑。 -->
+  <div id="tapplay"><i>▶</i><b>Tap to play</b></div>
+  <div id="unmute"><span>🔇</span> Tap for sound</div>
+  <div id="perr"></div>
+  <!-- VIP 专属剧的闸门。文案由 vip-gate.js 按集号填，卡片外不吃点击：
+       底部的上一集/选集和顶栏 ✕ 照常够得着 -->
+  <div id="pvip">
+    <div class="pvip-card">
+      <b id="pvip-t"></b>
+      <p id="pvip-s"></p>
+      <button id="pvip-go" class="pvip-go">Unlock with VIP</button>
+      <button id="pvip-x" class="pvip-x">Not now</button>
+    </div>
+  </div>
+  <div id="autonext">
+    <div class="box">
+      <div class="lb" id="an-lb"></div>
+      <div class="n" id="an-n">3</div>
+      <button class="go" id="an-go" onclick="step(1)"></button>
+    </div>
+  </div>
+  <div id="finish">
+    <div class="box">
+      <div class="done" id="fin-done"></div>
+      <div class="cards" id="fin-cards"></div>
+      <button class="cancel" id="fin-cancel" onclick="autonextStop()"></button>
+    </div>
+  </div>
+  <div id="sheetmask" onclick="closeSheet()"></div>
+  <div id="epsheet">
+    <div class="sheet-hd">
+      <span id="sheettitle"></span>
+      <span role="button" onclick="closeSheet()">✕</span>
+    </div>
+    <div class="sheet-seg" id="sheetseg" hidden></div>
+    <div class="sheet-bd">
+      <div id="sheeteps" class="eps"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 都不加 defer：位置在 body 末尾，DOM 已经建好，执行时机跟原来内联那份完全一样。
+     试过给两个都加 defer（想让 414KB 的 hls.min.js 不阻塞解析），
+     本地连点 Next 换集会间歇性卡在 loadstart 不出 loadedmetadata，8 连跳挂 4 次；
+     去掉就稳定。省下的那点解析时间不值得拿播放稳定性换。 -->
+<script src="/hls.min.js"></script>
+<script src="/app.js?v=0a488c54-60a9-488a-848b-12edc3a49418"></script>
+</body>
+</html>
