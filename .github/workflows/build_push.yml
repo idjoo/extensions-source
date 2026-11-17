@@ -127,6 +127,8 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i ~/.ssh/repo_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
 
           cp .github/repo-readme.md repo/README.md
+          cp .github/repo-site/index.html repo/index.html
+          touch repo/.nojekyll
           cd repo
           git init -b repo
           git config user.name "github-actions[bot]"

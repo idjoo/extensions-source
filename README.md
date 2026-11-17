@@ -28,6 +28,7 @@ https://raw.githubusercontent.com/idjoo/extensions/repo/index.min.json
 | `.github/workflows/build_push.yml` | Tests, signs release APKs, publishes to `idjoo/extensions` |
 | `.github/scripts/build-repo.mjs` | Builds `index.min.json`, `index.json`, `repo.json`, and icons |
 | `.github/repo-readme.md` | README published to `idjoo/extensions` |
+| `.github/repo-site/index.html` | Extension listing page served by GitHub Pages at https://idjoo.github.io/extensions/ |
 
 ## Release setup (maintainers)
 
