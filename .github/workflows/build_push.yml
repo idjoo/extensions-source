@@ -39,12 +39,12 @@ jobs:
         run: ./gradlew testDebugUnitTest assembleDebug
 
   publish:
-    name: Sign release APKs and publish repo branch
+    name: Sign release APKs and publish to idjoo/extensions
     needs: verify
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout master
         uses: actions/checkout@v4
@@ -113,14 +113,28 @@ jobs:
             --short-name "idjo" \
             --website "https://github.com/${{ github.repository }}"
 
-      - name: Publish orphan repo branch
+      - name: Publish to idjoo/extensions repo branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_DEPLOY_KEY: ${{ secrets.REPO_DEPLOY_KEY }}
         run: |
+          if [[ -z "$REPO_DEPLOY_KEY" ]]; then
+            echo "::error::Missing REPO_DEPLOY_KEY secret (write deploy key for idjoo/extensions)."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf "%s\n" "$REPO_DEPLOY_KEY" > ~/.ssh/repo_deploy_key
+          chmod 600 ~/.ssh/repo_deploy_key
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/repo_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+
+          cp .github/repo-readme.md repo/README.md
           cd repo
           git init -b repo
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "chore(repo): publish extension repository (${GITHUB_SHA::7})"
-          git push --force "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/repo
+          git commit -m "chore(repo): publish from ${GITHUB_REPOSITORY}@${GITHUB_SHA::7}"
+          git push --force git@github.com:idjoo/extensions.git HEAD:refs/heads/repo
+
+      - name: Remove deploy key
+        if: always()
+        run: rm -f ~/.ssh/repo_deploy_key

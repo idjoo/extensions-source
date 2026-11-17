@@ -1,5 +1,5 @@
 {
-  description = "Development shell and Android SDK toolchain for idjoo/extensions";
+  description = "Development shell and Android SDK toolchain for idjoo/extensions-source";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

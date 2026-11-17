@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Anikku (`komikku-app/anikku`) video extension repository using the standard `aniyomi-extensions` multi-module layout (`common.gradle`, `core/`, `lib/`, `src/all/dramatip/`).
+Aniyomi video extension source repository (`idjoo/extensions-source`) using the standard `aniyomi-extensions` multi-module layout (`common.gradle`, `core/`, `lib/`, `src/all/dramatip/`). Extensions run in Aniyomi and its forks (Anikku and others). CI publishes signed APKs and the repository index to the `repo` branch of `idjoo/extensions`, following the keiyoushi `extensions-source` / `extensions` split.
 
 ## Build and verification
 
@@ -26,7 +26,7 @@ Gotcha on `aarch64-linux`: Google Maven publishes `x86_64` binaries only for `aa
 
 ### Issue tracker
 
-Issues live in GitHub Issues (`idjoo/extensions`). See `docs/agents/issue-tracker.md`.
+Issues live in GitHub Issues (`idjoo/extensions-source`). See `docs/agents/issue-tracker.md`.
 
 ### Domain docs
 

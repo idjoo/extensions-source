@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues in `idjoo/extensions`. Use the `gh` CLI for all operations (authenticated as `idjoo`).
+Issues and specs for this repo live as GitHub issues in `idjoo/extensions-source`. Use the `gh` CLI for all operations (authenticated as `idjoo`).
 
 ## Conventions
 
@@ -16,7 +16,7 @@ Issues and specs for this repo live as GitHub issues in `idjoo/extensions`. Use 
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
-File issues only into `idjoo/extensions`. Before the first `gh issue create` of a session, verify the target with `gh repo view --json nameWithOwner`.
+File issues only into `idjoo/extensions-source`. Before the first `gh issue create` of a session, verify the target with `gh repo view --json nameWithOwner`.
 
 ## Pull requests as a triage surface
 

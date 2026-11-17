@@ -42,15 +42,15 @@ cat <<EOF
 Generated keystore: $KEYSTORE_FILE
 Certificate SHA-256 fingerprint: $FINGERPRINT
 
-Configure these four GitHub Actions secrets in idjoo/extensions:
+Configure these four GitHub Actions secrets in idjoo/extensions-source:
   SIGNING_KEY         (base64 keystore below)
   ALIAS               $KEY_ALIAS
   KEY_STORE_PASSWORD  $STORE_PASS
   KEY_PASSWORD        $KEY_PASS
 
 Example commands using GitHub CLI:
-  printf '%s' '$B64_KEY' | gh secret set SIGNING_KEY --repo idjoo/extensions
-  printf '%s' '$KEY_ALIAS' | gh secret set ALIAS --repo idjoo/extensions
-  printf '%s' '$STORE_PASS' | gh secret set KEY_STORE_PASSWORD --repo idjoo/extensions
-  printf '%s' '$KEY_PASS' | gh secret set KEY_PASSWORD --repo idjoo/extensions
+  printf '%s' '$B64_KEY' | gh secret set SIGNING_KEY --repo idjoo/extensions-source
+  printf '%s' '$KEY_ALIAS' | gh secret set ALIAS --repo idjoo/extensions-source
+  printf '%s' '$STORE_PASS' | gh secret set KEY_STORE_PASSWORD --repo idjoo/extensions-source
+  printf '%s' '$KEY_PASS' | gh secret set KEY_PASSWORD --repo idjoo/extensions-source
 EOF

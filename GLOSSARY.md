@@ -1,11 +1,11 @@
-# DramaTip Anikku Extension
+# DramaTip Aniyomi Extension
 
-This context bridges DramaTip's aggregated vertical short-drama catalog into Anikku so users can browse, track, stream, and download microdrama series alongside their other video libraries.
+This context bridges DramaTip's aggregated vertical short-drama catalog into Aniyomi-compatible apps (Aniyomi, Anikku, and other forks) so users can browse, track, stream, and download microdrama series alongside their other video libraries.
 
 ## Language
 
 **Catalog Source**:
-A localized DramaTip catalog exposed as a distinct browsable entry in Anikku for a single Locale.
+A localized DramaTip catalog exposed as a distinct browsable entry in the app for a single Locale.
 _Avoid_: Provider, channel, feed
 
 **Locale**:
@@ -41,5 +41,5 @@ An ordered fallback sequence of candidate video streams returned inside a Stream
 _Avoid_: Mirror list, playlist
 
 **Extension Repository**:
-A static HTTP index publishing signed extension APK metadata and icons so Anikku can install and update the extension via URL.
+A static HTTP index publishing signed extension APK metadata and icons so Aniyomi-compatible apps can install and update the extension via URL.
 _Avoid_: App store, plugin feed

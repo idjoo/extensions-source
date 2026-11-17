@@ -30,7 +30,7 @@ class DramaTip(
 
     override val name: String = "DramaTip"
 
-    override val lang: String = locale.anikkuLang
+    override val lang: String = locale.aniyomiLang
 
     override val supportsLatest: Boolean = true
 

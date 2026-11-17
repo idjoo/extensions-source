@@ -48,7 +48,7 @@ const iconDir = path.join(repoDir, "icon");
 const inspectorPath = path.resolve(args["inspector-json"] || "output.json");
 const repoName = args["repo-name"] || "idjo";
 const shortName = args["short-name"] || "idjo";
-const website = args["website"] || "https://github.com/idjoo/extensions";
+const website = args["website"] || "https://github.com/idjoo/extensions-source";
 const aapt2Bin = findAapt2(args["aapt2"] || args["aapt"]);
 
 fs.mkdirSync(iconDir, { recursive: true });

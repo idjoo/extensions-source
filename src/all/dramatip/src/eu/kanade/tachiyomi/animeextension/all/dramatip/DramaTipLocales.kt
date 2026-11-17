@@ -4,7 +4,7 @@ import java.net.URLEncoder
 
 data class DramaTipLocale(
     val siteLocale: String,
-    val anikkuLang: String,
+    val aniyomiLang: String,
     val displayName: String,
     val popularCategorySlug: String = "populer",
     val latestCategorySlug: String = "newly-added",

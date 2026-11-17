@@ -41,22 +41,22 @@ class DramaTipIntegrationTest {
     }
 
     @Test
-    fun `defines all 16 DramaTip Locales with distinct Anikku languages, prefixes, and source IDs`() {
+    fun `defines all 16 DramaTip Locales with distinct Aniyomi languages, prefixes, and source IDs`() {
         val locales = DramaTipLocales.ALL
         assertEquals(16, locales.size)
         assertEquals(16, locales.map { it.siteLocale }.toSet().size)
-        assertEquals(16, locales.map { it.anikkuLang }.toSet().size)
+        assertEquals(16, locales.map { it.aniyomiLang }.toSet().size)
 
         val en = locales.first { it.siteLocale == "en" }
-        assertEquals("en", en.anikkuLang)
+        assertEquals("en", en.aniyomiLang)
         assertEquals("", en.pathPrefix)
 
         val pt = locales.first { it.siteLocale == "pt" }
-        assertEquals("pt-BR", pt.anikkuLang)
+        assertEquals("pt-BR", pt.aniyomiLang)
         assertEquals("/pt", pt.pathPrefix)
 
         val generatedIds = locales.map { loc ->
-            val key = "dramatip/${loc.anikkuLang}/1"
+            val key = "dramatip/${loc.aniyomiLang}/1"
             val md5 = MessageDigest.getInstance("MD5").digest(key.toByteArray())
             (0..7).map { md5[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
         }.toSet()
@@ -225,7 +225,7 @@ class DramaTipIntegrationTest {
             .getResourceAsStream("DramaTipStreamResolver.class")!!
             .use { String(it.readBytes(), Charsets.ISO_8859_1) }
         org.junit.Assert.assertFalse(
-            "Video is not a data class in Anikku extensions-lib 15; must not invoke copy\$default",
+            "Video is not a data class in Aniyomi extensions-lib 15; must not invoke copy\$default",
             resolverBytecode.contains("copy\$default"),
         )
     }

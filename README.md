@@ -1,46 +1,59 @@
-# Anikku Extensions (`idjoo/extensions`)
+# idjo Extensions Source
 
-Standalone [Anikku](https://github.com/komikku-app/anikku) video extension repository following the standard `aniyomi-extensions` multi-module layout.
+Source code of the [Aniyomi](https://github.com/aniyomiorg/aniyomi) extensions published in [`idjoo/extensions`](https://github.com/idjoo/extensions). The extensions use the standard Aniyomi extensions-lib, so they run in Aniyomi and its forks, such as [Anikku](https://github.com/komikku-app/anikku).
 
-## Included Extensions
+The layout follows [`keiyoushi/extensions-source`](https://github.com/keiyoushi/extensions-source): this repository holds code and CI, and CI pushes signed APKs and the repository index to the `repo` branch of `idjoo/extensions`.
 
-| Extension | Package | Locales | Notes |
+## Using the extensions
+
+Add this URL under **More** -> **Settings** -> **Browse** -> **Anime extension repos**:
+
+```text
+https://raw.githubusercontent.com/idjoo/extensions/repo/index.min.json
+```
+
+## Extensions
+
+| Extension | Package | Languages | Notes |
 | --- | --- | --- | --- |
-| **DramaTip** (`dramatip.net`) | `eu.kanade.tachiyomi.animeextension.all.dramatip` | 16 (`en`, `de`, `es`, `ru`, `fr`, `ar`, `ko`, `th`, `pt-BR`, `it`, `ja`, `id`, `vi`, `fil`, `hi`, `ms`) | Popular, New Releases, search (query, `slug:<slug>`, or full URL), Category and Upstream Provider filters, 9:16 HLS track selection, and localhost stream adapter for encrypted/key-rewritten streams. |
+| **DramaTip** (`dramatip.net`) | `eu.kanade.tachiyomi.animeextension.all.dramatip` | 16 (`en`, `de`, `es`, `ru`, `fr`, `ar`, `ko`, `th`, `pt-BR`, `it`, `ja`, `id`, `vi`, `fil`, `hi`, `ms`) | Popular, New Releases, search (query, `slug:<slug>`, or full URL), Category and Upstream Provider filters, 9:16 HLS track selection, and a localhost stream adapter for encrypted or key-rewritten streams. |
 
-## Adding This Repository in Anikku
+## Layout
 
-1. Open **Anikku** -> **More** -> **Settings** -> **Browse** -> **Anime extension repos**.
-2. Tap **Add** and enter:
-   ```text
-   https://raw.githubusercontent.com/idjoo/extensions/repo/index.min.json
-   ```
-3. Refresh the **Extensions** tab and install **Aniyomi: DramaTip**.
+| Path | Purpose |
+| --- | --- |
+| `src/<lang>/<name>/` | One Gradle module per extension |
+| `core/`, `lib/` | Shared extension code |
+| `common.gradle`, `buildSrc/` | Shared build logic |
+| `.github/workflows/build_push.yml` | Tests, signs release APKs, publishes to `idjoo/extensions` |
+| `.github/scripts/build-repo.mjs` | Builds `index.min.json`, `index.json`, `repo.json`, and icons |
+| `.github/repo-readme.md` | README published to `idjoo/extensions` |
 
-## Release Signing Setup (Maintainers)
+## Release setup (maintainers)
 
-CI signs release APKs using a persistent PKCS12 keystore stored in GitHub Actions secrets and refuses to publish unsigned or ephemerally signed APKs.
+CI signs release APKs with a persistent PKCS12 keystore and refuses to publish without it.
 
-1. Generate a persistent keystore locally inside the Nix shell:
+1. Generate the keystore inside the Nix shell and keep a secure backup of `signingkey.jks` (`*.jks` is gitignored):
    ```bash
    nix develop -c ./scripts/gen-keystore.sh
    ```
-2. Set the four printed repository secrets (`SIGNING_KEY`, `ALIAS`, `KEY_STORE_PASSWORD`, `KEY_PASSWORD`) in `idjoo/extensions` (**Settings** -> **Secrets and variables** -> **Actions**). Keep a secure backup of `signingkey.jks` (`*.jks` is gitignored).
-3. Push to `master` (or trigger **Build and Publish Extensions** via `workflow_dispatch`) to publish `apk/`, `icon/`, `index.min.json`, `index.json`, and `repo.json` onto the orphan `repo` branch.
+2. Set the printed secrets (`SIGNING_KEY`, `ALIAS`, `KEY_STORE_PASSWORD`, `KEY_PASSWORD`) in `idjoo/extensions-source`.
+3. Add an SSH deploy key with write access to `idjoo/extensions`, and store its private key as the `REPO_DEPLOY_KEY` secret in `idjoo/extensions-source`.
+4. Push to `master` (or run **Build and Publish Extensions** manually).
 
-## Local Development (NixOS / Linux / macOS)
+## Local development (NixOS / Linux / macOS)
 
-All JDK 17 and Android SDK 34 tools (including native `aarch64-linux` `aapt2` and `zipalign`) are provided by `flake.nix`:
+`flake.nix` provides JDK 17 and Android SDK 34 tools, including native `aarch64-linux` `aapt2` and `zipalign`:
 
 ```bash
-# Run unit tests across all modules
+# Unit tests
 nix develop -c ./gradlew testDebugUnitTest
 
-# Run opt-in live network smoke tests against dramatip.net
+# Opt-in live smoke tests against dramatip.net
 nix develop -c ./gradlew testDebugUnitTest -PliveSmoke=true
 
-# Build the debug APK
+# Debug APK
 nix develop -c ./gradlew :src:all:dramatip:assembleDebug
 ```
 
-Domain terminology is documented in [GLOSSARY.md](./GLOSSARY.md) and architectural decisions are recorded under [docs/adr/](./docs/adr/).
+Domain terms are in [GLOSSARY.md](./GLOSSARY.md), and architectural decisions are under [docs/adr/](./docs/adr/).
