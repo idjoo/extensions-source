@@ -49,7 +49,8 @@ const inspectorPath = path.resolve(args["inspector-json"] || "output.json");
 const repoName = args["repo-name"] || "idjo";
 const shortName = args["short-name"] || "idjo";
 const website = args["website"] || "https://github.com/idjoo/extensions-source";
-const aapt2Bin = findAapt2(args["aapt2"] || args["aapt"]);
+const cdnBase = args["cdn-base"] || "https://raw.githubusercontent.com/idjoo/extensions/repo";
+const aapt2Bin =findAapt2(args["aapt2"] || args["aapt"]);
 
 fs.mkdirSync(iconDir, { recursive: true });
 
@@ -131,18 +132,44 @@ for (const apkName of apkFiles) {
     })),
   });
 
+  const libVersion = /^(\d+\.\d+)/.exec(versionName)?.[1] || versionName;
   indexData.push({
-    ...common,
-    hasReadme: 0,
-    hasChangelog: 0,
-    sources,
+    name: appLabel,
+    packageName,
+    resources: {
+      apkUrl: `${cdnBase}/apk/${apkName}`,
+      iconUrl: `${cdnBase}/icon/${packageName}.png`,
+    },
+    extensionLib: libVersion,
+    versionCode: String(versionCode),
+    versionName,
+    contentWarning: nsfwValue ? "CONTENT_WARNING_NSFW" : "CONTENT_WARNING_SAFE",
+    sources: sources.map((s) => ({
+      id: String(s.id),
+      name: s.name,
+      language: s.lang,
+      homeUrl: s.baseUrl,
+    })),
   });
 }
 
-indexData.sort((a, b) => a.pkg.localeCompare(b.pkg));
+indexData.sort((a, b) => a.packageName.localeCompare(b.packageName));
 indexMinData.sort((a, b) => a.pkg.localeCompare(b.pkg));
 
-fs.writeFileSync(path.join(repoDir, "index.json"), JSON.stringify(indexData, null, 2) + "\n");
+// Store-format index consumed by the idjoo.github.io VitePress site.
+fs.writeFileSync(
+  path.join(repoDir, "index.json"),
+  JSON.stringify(
+    {
+      name: repoName,
+      signingKey: repoFingerprint,
+      contact: { website },
+      extensionList: { extensions: indexData },
+    },
+    null,
+    2,
+  ) + "\n",
+);
 fs.writeFileSync(path.join(repoDir, "index.min.json"), JSON.stringify(indexMinData));
 fs.writeFileSync(
   path.join(repoDir, "repo.json"),
