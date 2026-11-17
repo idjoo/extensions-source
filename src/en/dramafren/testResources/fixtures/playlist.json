@@ -1,0 +1,43 @@
+{
+  "success": true,
+  "data": {
+    "episodes": [
+      {
+        "id": "701897713",
+        "name": "EP 1",
+        "sources": {
+          "1080": "https://hwztakavideoto.dramaboxdb.com/4f17e97c6b694cf35635d31c4ece48da/6afdd6c2/31/8x5/85x2/852x3/85233000024/701897713_1/701897713.1080p.wz.h264.mp4",
+          "720": "https://hwztakavideoto.dramaboxdb.com/cb788a21e4c562d71332baa776afaf0e/6afdd6c2/31/8x5/85x2/852x3/85233000024/701897713_1/701897713.720p.wz.h264.mp4",
+          "540": "https://hwztakavideoto.dramaboxdb.com/08460e32ee5897421d2fa3da8f6e0a65/6afdd6c2/31/8x5/85x2/852x3/85233000024/701897713_1/701897713.540p.wz.h264.mp4",
+          "auto": "https://hwztakavideoto.dramaboxdb.com/cb788a21e4c562d71332baa776afaf0e/6afdd6c2/31/8x5/85x2/852x3/85233000024/701897713_1/701897713.720p.wz.h264.mp4"
+        }
+      },
+      {
+        "id": "701897714",
+        "name": "EP 2",
+        "sources": {
+          "1080": "https://hwztakavideoto.dramaboxdb.com/509634537b765943dc3a373139ae5d6e/6afdd6c2/41/8x5/85x2/852x3/85233000024/701897714_1/701897714.1080p.wz.h264.mp4",
+          "720": "https://hwztakavideoto.dramaboxdb.com/61513a33dfec1860d8ab9a4b1b960f1d/6afdd6c2/41/8x5/85x2/852x3/85233000024/701897714_1/701897714.720p.wz.h264.mp4",
+          "540": "https://hwztakavideoto.dramaboxdb.com/f316ebc41a7d557d0947a8d99f32d8fe/6afdd6c2/41/8x5/85x2/852x3/85233000024/701897714_1/701897714.540p.wz.h264.mp4",
+          "auto": "https://hwztakavideoto.dramaboxdb.com/61513a33dfec1860d8ab9a4b1b960f1d/6afdd6c2/41/8x5/85x2/852x3/85233000024/701897714_1/701897714.720p.wz.h264.mp4"
+        }
+      },
+      {
+        "id": "701897715",
+        "name": "EP 3",
+        "sources": {
+          "1080": "https://hwztakavideoto.dramaboxdb.com/167085a319cd3aa81c4f8f425bef4eea/6afdd6c2/51/8x5/85x2/852x3/85233000024/701897715_1/701897715.1080p.wz.h264.mp4",
+          "720": "https://hwztakavideoto.dramaboxdb.com/9b8171d1e42cd2c068dbdf5304e420f1/6afdd6c2/51/8x5/85x2/852x3/85233000024/701897715_1/701897715.720p.wz.h264.mp4",
+          "540": "https://hwztakavideoto.dramaboxdb.com/848d7b145b8056002c436797f48deb74/6afdd6c2/51/8x5/85x2/852x3/85233000024/701897715_1/701897715.540p.wz.h264.mp4",
+          "auto": "https://hwztakavideoto.dramaboxdb.com/9b8171d1e42cd2c068dbdf5304e420f1/6afdd6c2/51/8x5/85x2/852x3/85233000024/701897715_1/701897715.720p.wz.h264.mp4"
+        }
+      },
+      {
+        "id": "701897999",
+        "name": "EP 61",
+        "sources": {}
+      }
+    ],
+    "baseUrl": "https://v2.dramafren.org/?msdb_book=42000033258&msdb_lang=en"
+  }
+}
