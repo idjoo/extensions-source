@@ -1,0 +1,80 @@
+package eu.kanade.tachiyomi.animeextension.all.dramaexpress
+
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformCatalogRoutes
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformCipher
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformLocales
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformParser
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformStreamResolver
+import eu.kanade.tachiyomi.lib.streamproxy.LoopbackStreamProxy
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
+import org.junit.Test
+
+class DramaExpressLiveSmokeTest {
+
+    @Test
+    fun `fetches live Popular Series, Episode list, and playable Stream Chain from dramaexpress_net`() {
+        assumeTrue(
+            "Pass -PliveSmoke=true to run live smoke check against dramaexpress.net",
+            System.getProperty("liveSmoke") == "true",
+        )
+
+        val client = OkHttpClient()
+        val ua = LoopbackStreamProxy.DEFAULT_USER_AGENT
+        val baseUrl = DramaExpress.DEFAULT_BASE_URL
+        val enLocale = DramaPlatformLocales.ALL.first { it.siteLocale == "en" }
+
+        val popularHtml = client.newCall(
+            Request.Builder()
+                .url(DramaPlatformCatalogRoutes.popularUrl(baseUrl, enLocale, page = 1))
+                .header("User-Agent", ua)
+                .build(),
+        ).execute().use { res ->
+            assertTrue("Expected 200 on popular page, got ${res.code}", res.isSuccessful)
+            res.body.string()
+        }
+
+        val seriesPage = DramaPlatformParser.parseSeriesPage(popularHtml, currentPage = 1, baseUrl = baseUrl)
+        assertFalse("Expected non-empty Popular Series list", seriesPage.series.isEmpty())
+
+        val firstSeries = seriesPage.series.first()
+        val seriesHtml = client.newCall(
+            Request.Builder()
+                .url("$baseUrl${firstSeries.url}")
+                .header("User-Agent", ua)
+                .build(),
+        ).execute().use { res ->
+            assertTrue("Expected 200 on series page, got ${res.code}", res.isSuccessful)
+            res.body.string()
+        }
+
+        val details = DramaPlatformParser.parseSeriesDetails(seriesHtml, firstSeries.url, baseUrl)
+        assertTrue("Expected Series title", details.title.isNotBlank())
+
+        val episodes = DramaPlatformParser.parseEpisodeList(seriesHtml, firstSeries.url, showLockedEpisodes = false, baseUrl = baseUrl)
+        assertFalse("Expected unlocked Episodes on popular Series", episodes.isEmpty())
+
+        val episode1 = episodes.last()
+        LoopbackStreamProxy(httpClient = client, userAgent = ua, cdnOrigin = baseUrl).use { proxy ->
+            val resolver = DramaPlatformStreamResolver(
+                httpClient = client,
+                cipher = DramaPlatformCipher(),
+                loopbackProxy = proxy,
+                userAgent = ua,
+                siteName = "DramaExpress",
+                cdnOrigin = baseUrl,
+            )
+            val videos = resolver.resolveEpisodeVideos(
+                episodeUrl = episode1.url,
+                baseUrl = baseUrl,
+                locale = enLocale,
+                preferredQuality = "1080p",
+                fastHlsMode = false,
+            )
+            assertFalse("Expected non-empty resolved Video list for ${episode1.url}", videos.isEmpty())
+        }
+    }
+}

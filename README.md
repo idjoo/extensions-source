@@ -17,13 +17,14 @@ https://raw.githubusercontent.com/idjoo/extensions/repo/index.min.json
 | Extension | Package | Languages | Notes |
 | --- | --- | --- | --- |
 | **DramaTip** (`dramatip.net`) | `eu.kanade.tachiyomi.animeextension.all.dramatip` | 16 (`en`, `de`, `es`, `ru`, `fr`, `ar`, `ko`, `th`, `pt-BR`, `it`, `ja`, `id`, `vi`, `fil`, `hi`, `ms`) | Popular, New Releases, search (query, `slug:<slug>`, or full URL), Category and Upstream Provider filters, 9:16 HLS track selection, and a localhost stream adapter for encrypted or key-rewritten streams. |
+| **DramaExpress** (`dramaexpress.net`) | `eu.kanade.tachiyomi.animeextension.all.dramaexpress` | Same 16 as DramaTip | Same platform as DramaTip, built on `lib/drama-platform`. |
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
 | `src/<lang>/<name>/` | One Gradle module per extension |
-| `core/`, `lib/` | Shared extension code |
+| `core/`, `lib/` | Shared extension code (`lib/drama-platform` holds the DramaTip-family Catalog Source, `lib/stream-proxy` the loopback proxy) |
 | `common.gradle`, `buildSrc/` | Shared build logic |
 | `.github/workflows/build_push.yml` | Tests, signs release APKs, publishes to `idjoo/extensions` |
 | `.github/scripts/build-repo.mjs` | Builds `index.min.json`, `index.json`, `repo.json`, and icons |
@@ -50,7 +51,7 @@ CI signs release APKs with a persistent PKCS12 keystore and refuses to publish w
 # Unit tests
 nix develop -c ./gradlew testDebugUnitTest
 
-# Opt-in live smoke tests against dramatip.net
+# Opt-in live smoke tests against dramatip.net and dramaexpress.net
 nix develop -c ./gradlew testDebugUnitTest -PliveSmoke=true
 
 # Debug APK
