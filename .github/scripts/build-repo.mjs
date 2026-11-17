@@ -132,7 +132,7 @@ for (const apkName of apkFiles) {
     })),
   });
 
-  const libVersion = /^(\d+\.\d+)/.exec(versionName)?.[1] || versionName;
+  const libVersion = /^(\d+)\./.exec(versionName)?.[1] || versionName;
   indexData.push({
     name: appLabel,
     packageName,

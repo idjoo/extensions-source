@@ -14,7 +14,7 @@ https://raw.githubusercontent.com/idjoo/extensions/repo/index.min.json
 
 Then refresh the **Extensions** tab.
 
-Or open https://idjoo.github.io/extensions/ on your phone and tap **Add to app**. The page also lists every extension with a direct APK download.
+Or open https://idjoo.github.io/add-repo-ani on your phone to add it in one tap. https://idjoo.github.io/extensions-aniyomi/ lists every extension with a direct APK download.
 
 ## Extensions
 
