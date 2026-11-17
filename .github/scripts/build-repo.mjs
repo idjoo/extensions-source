@@ -153,6 +153,7 @@ fs.writeFileSync(
         shortName,
         website,
         signingKeyFingerprint: repoFingerprint,
+        icon,
       },
     },
     null,
