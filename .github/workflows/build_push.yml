@@ -114,6 +114,8 @@ jobs:
             --website "https://github.com/${{ github.repository }}"
 
       - name: Publish orphan repo branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd repo
           git init -b repo
