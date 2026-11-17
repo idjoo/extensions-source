@@ -110,7 +110,7 @@ jobs:
             --repo-dir repo \
             --inspector-json output.json \
             --repo-name "idjo" \
-            --short-name "idjoo" \
+            --short-name "idjo" \
             --website "https://github.com/${{ github.repository }}"
 
       - name: Publish orphan repo branch
