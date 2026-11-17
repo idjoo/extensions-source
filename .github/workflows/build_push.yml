@@ -3,10 +3,10 @@ name: Build and Publish Extensions
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 concurrency:
@@ -39,12 +39,12 @@ jobs:
   publish:
     name: Sign release APKs and publish repo branch
     needs: verify
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: Checkout main
+      - name: Checkout master
         uses: actions/checkout@v4
 
       - name: Validate persistent signing secrets

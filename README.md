@@ -26,7 +26,7 @@ CI signs release APKs using a persistent PKCS12 keystore stored in GitHub Action
    nix develop -c ./scripts/gen-keystore.sh
    ```
 2. Set the four printed repository secrets (`SIGNING_KEY`, `ALIAS`, `KEY_STORE_PASSWORD`, `KEY_PASSWORD`) in `idjoo/extensions` (**Settings** -> **Secrets and variables** -> **Actions**). Keep a secure backup of `signingkey.jks` (`*.jks` is gitignored).
-3. Push to `main` (or trigger **Build and Publish Extensions** via `workflow_dispatch`) to publish `apk/`, `icon/`, `index.min.json`, `index.json`, and `repo.json` onto the orphan `repo` branch.
+3. Push to `master` (or trigger **Build and Publish Extensions** via `workflow_dispatch`) to publish `apk/`, `icon/`, `index.min.json`, `index.json`, and `repo.json` onto the orphan `repo` branch.
 
 ## Local Development (NixOS / Linux / macOS)
 
