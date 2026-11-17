@@ -109,7 +109,7 @@ jobs:
           node .github/scripts/build-repo.mjs \
             --repo-dir repo \
             --inspector-json output.json \
-            --repo-name "idjoo Anikku Extensions" \
+            --repo-name "idjo" \
             --short-name "idjoo" \
             --website "https://github.com/${{ github.repository }}"
 

@@ -46,10 +46,9 @@ const repoDir = path.resolve(args["repo-dir"] || "repo");
 const apkDir = path.join(repoDir, "apk");
 const iconDir = path.join(repoDir, "icon");
 const inspectorPath = path.resolve(args["inspector-json"] || "output.json");
-const repoName = args["repo-name"] || "idjoo Anikku Extensions";
+const repoName = args["repo-name"] || "idjo";
 const shortName = args["short-name"] || "idjoo";
 const website = args["website"] || "https://github.com/idjoo/extensions";
-const icon = args["icon"] || "https://ember.idjo.cc/images/logo.png";
 const aapt2Bin = findAapt2(args["aapt2"] || args["aapt"]);
 
 fs.mkdirSync(iconDir, { recursive: true });
@@ -154,7 +153,6 @@ fs.writeFileSync(
         shortName,
         website,
         signingKeyFingerprint: repoFingerprint,
-        icon,
       },
     },
     null,
