@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import org.junit.Assert.assertEquals
@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class DramaTipParserTest {
+class DramaPlatformParserTest {
 
     @Test
     fun `parses Series cards and pagination from Category and Search HTML`() {
@@ -33,7 +33,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val page1 = DramaTipParser.parseSeriesPage(categoryPageHtml, currentPage = 1)
+        val page1 = DramaPlatformParser.parseSeriesPage(categoryPageHtml, currentPage = 1)
         assertEquals(2, page1.series.size)
         assertEquals("/series/while-my-wifes-away", page1.series[0].url)
         assertEquals("While My Wife's Away", page1.series[0].title)
@@ -42,7 +42,7 @@ class DramaTipParserTest {
         assertEquals("My Mafia Husband Lost Control", page1.series[1].title)
         assertTrue(page1.hasNextPage)
 
-        val lastPage = DramaTipParser.parseSeriesPage(categoryPageHtml, currentPage = 84)
+        val lastPage = DramaPlatformParser.parseSeriesPage(categoryPageHtml, currentPage = 84)
         assertFalse(lastPage.hasNextPage)
 
         val searchHtml = """
@@ -55,7 +55,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val searchPage = DramaTipParser.parseSeriesPage(
+        val searchPage = DramaPlatformParser.parseSeriesPage(
             html = searchHtml,
             currentPage = 1,
             baseUrl = "https://dramatip.net",
@@ -86,7 +86,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val completed = DramaTipParser.parseSeriesDetails(completedHtml, "/series/while-my-wifes-away")
+        val completed = DramaPlatformParser.parseSeriesDetails(completedHtml, "/series/while-my-wifes-away")
         assertEquals("While My Wife's Away", completed.title)
         assertEquals("Vigloo", completed.upstreamProvider)
         assertEquals("https://asset.vigloo.com/poster.png", completed.thumbnailUrl)
@@ -108,7 +108,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val ongoing = DramaTipParser.parseSeriesDetails(
+        val ongoing = DramaPlatformParser.parseSeriesDetails(
             updatingHtml,
             "/series/my-mafia-husband-lost-control-updating",
         )
@@ -130,7 +130,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val unlockedOnly = DramaTipParser.parseEpisodeList(
+        val unlockedOnly = DramaPlatformParser.parseEpisodeList(
             html = rscHtml,
             seriesPath = "/pt/series/secret-ceo",
             showLockedEpisodes = false,
@@ -149,7 +149,7 @@ class DramaTipParserTest {
             unlockedOnly[1].url,
         )
 
-        val withLocked = DramaTipParser.parseEpisodeList(
+        val withLocked = DramaPlatformParser.parseEpisodeList(
             html = rscHtml,
             seriesPath = "/pt/series/secret-ceo",
             showLockedEpisodes = true,
@@ -158,7 +158,7 @@ class DramaTipParserTest {
         assertEquals("[Locked] Episode 3", withLocked[0].name)
         assertEquals(3f, withLocked[0].episodeNumber)
 
-        val parsedRef = DramaTipParser.parseEpisodeUrl(unlockedOnly[1].url)
+        val parsedRef = DramaPlatformParser.parseEpisodeUrl(unlockedOnly[1].url)
         assertEquals("/pt/series/secret-ceo/episode-1", parsedRef.episodePath)
         assertEquals(1, parsedRef.displayNumber)
         assertNotNull(parsedRef.playbackTarget)
@@ -166,9 +166,9 @@ class DramaTipParserTest {
         assertEquals(0, parsedRef.playbackTarget?.rawSerial)
         assertEquals(true, parsedRef.playbackTarget?.rawCatalog)
 
-        val legacyRef = DramaTipParser.parseEpisodeUrl("/pt/series/secret-ceo/episode-2")
+        val legacyRef = DramaPlatformParser.parseEpisodeUrl("/pt/series/secret-ceo/episode-2")
         assertNull(legacyRef.playbackTarget)
-        val recovered = DramaTipParser.recoverPlaybackTarget(rscHtml, displayNumber = 2)
+        val recovered = DramaPlatformParser.recoverPlaybackTarget(rscHtml, displayNumber = 2)
         assertNotNull(recovered)
         assertEquals("gs-book/99", recovered?.bookId)
         assertEquals(1, recovered?.rawSerial)
@@ -181,7 +181,7 @@ class DramaTipParserTest {
               </script>
             </head><body><h1>Fallback Drama</h1></body></html>
         """.trimIndent()
-        val fallbackEpisodes = DramaTipParser.parseEpisodeList(
+        val fallbackEpisodes = DramaPlatformParser.parseEpisodeList(
             html = domOnlyHtml,
             seriesPath = "/series/fallback-drama",
             showLockedEpisodes = false,
@@ -206,7 +206,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val categories = DramaTipParser.parseCategories(categoriesHtml)
+        val categories = DramaPlatformParser.parseCategories(categoriesHtml)
         assertEquals(
             listOf(
                 FilterOption(name = "Populer", slug = "populer"),
@@ -230,7 +230,7 @@ class DramaTipParserTest {
             </body></html>
         """.trimIndent()
 
-        val providers = DramaTipParser.parseUpstreamProviders(providersHtml)
+        val providers = DramaPlatformParser.parseUpstreamProviders(providersHtml)
         assertEquals(
             listOf(
                 FilterOption(name = "Flareshort", slug = "flareshort"),
@@ -241,16 +241,16 @@ class DramaTipParserTest {
 
         assertEquals(
             "/pt/series/while-my-wifes-away",
-            DramaTipParser.resolveDirectSeriesPath("slug:while-my-wifes-away", localePrefix = "/pt"),
+            DramaPlatformParser.resolveDirectSeriesPath("slug:while-my-wifes-away", localePrefix = "/pt"),
         )
         assertEquals(
             "/id/series/cinta-rahasia",
-            DramaTipParser.resolveDirectSeriesPath(
+            DramaPlatformParser.resolveDirectSeriesPath(
                 "https://dramatip.net/id/series/cinta-rahasia/episode-4#bookId=1",
                 localePrefix = "",
             ),
         )
-        assertNull(DramaTipParser.resolveDirectSeriesPath("secret billionaire", localePrefix = ""))
+        assertNull(DramaPlatformParser.resolveDirectSeriesPath("secret billionaire", localePrefix = ""))
     }
 
     @Test
@@ -260,7 +260,7 @@ class DramaTipParserTest {
         val escapedPayload = payload.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
         val html = """<html><body><script>self.__next_f.push([1,"$escapedPayload"])</script></body></html>"""
 
-        val episodes = DramaTipParser.parseEpisodeList(html, "/series/big-drama", showLockedEpisodes = false)
+        val episodes = DramaPlatformParser.parseEpisodeList(html, "/series/big-drama", showLockedEpisodes = false)
         assertEquals(1, episodes.size)
         assertEquals("/series/big-drama/episode-1#bookId=bk_big&serial=1&raw=0", episodes[0].url)
     }

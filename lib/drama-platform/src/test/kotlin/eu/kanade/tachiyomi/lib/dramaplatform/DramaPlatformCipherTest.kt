@@ -1,11 +1,11 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class DramaTipCipherTest {
+class DramaPlatformCipherTest {
 
     @Test
     fun `decrypts Stream Descriptor chain, quality map, top-level fallback, and subtitle while skipping corrupted ciphertext`() {
@@ -48,7 +48,7 @@ class DramaTipCipherTest {
             }
         """.trimIndent()
 
-        val cipher = DramaTipCipher()
+        val cipher = DramaPlatformCipher()
         val result = cipher.decryptStreamDescriptor(apiJson)
 
         assertTrue(result.hasEncryptedPayload)
@@ -127,7 +127,7 @@ class DramaTipCipherTest {
 
         var rotatedCallbackValue: String? = null
         var chunksRead = 0
-        val cipher = DramaTipCipher(onKeyRotated = { rotatedCallbackValue = it })
+        val cipher = DramaPlatformCipher(onKeyRotated = { rotatedCallbackValue = it })
 
         val withoutRecovery = cipher.decryptStreamDescriptor(apiJson)
         assertTrue(withoutRecovery.hasEncryptedPayload)

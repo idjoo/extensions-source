@@ -26,6 +26,7 @@ class LoopbackStreamProxy(
     private val siteBaseUrlProvider: () -> String = { "https://dramatip.net" },
     private val userAgent: String = DEFAULT_USER_AGENT,
     private val cdnProxyBase: String = "https://cdn.dramadizilerim.xyz",
+    private val cdnOrigin: String = "https://dramatip.net",
     private val bunnyProxyBase: String = "https://hls-proxy-i4ic7.b-cdn.net",
     private val idleTimeoutMs: Long = 10 * 60 * 1000L,
     private val allowedInsecureHosts: Set<String> = emptySet(),
@@ -457,8 +458,8 @@ class LoopbackStreamProxy(
             .url(url)
             .header("User-Agent", userAgent)
         if (url.startsWith(cdnProxyBase)) {
-            builder.header("Origin", "https://dramatip.net")
-            builder.header("Referer", "https://dramatip.net/")
+            builder.header("Origin", cdnOrigin.trimEnd('/'))
+            builder.header("Referer", "${cdnOrigin.trimEnd('/')}/")
         } else {
             builder.header("Referer", "${siteBaseUrlProvider().trimEnd('/')}/")
         }

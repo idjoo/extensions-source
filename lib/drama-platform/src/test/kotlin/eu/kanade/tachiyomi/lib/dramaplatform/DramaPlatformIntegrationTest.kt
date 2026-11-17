@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.lib.streamproxy.LoopbackStreamProxy
 import okhttp3.OkHttpClient
@@ -13,7 +13,7 @@ import org.junit.Before
 import org.junit.Test
 import java.security.MessageDigest
 
-class DramaTipIntegrationTest {
+class DramaPlatformIntegrationTest {
 
     private lateinit var server: MockWebServer
     private lateinit var client: OkHttpClient
@@ -42,7 +42,7 @@ class DramaTipIntegrationTest {
 
     @Test
     fun `defines all 16 DramaTip Locales with distinct Aniyomi languages, prefixes, and source IDs`() {
-        val locales = DramaTipLocales.ALL
+        val locales = DramaPlatformLocales.ALL
         assertEquals(16, locales.size)
         assertEquals(16, locales.map { it.siteLocale }.toSet().size)
         assertEquals(16, locales.map { it.aniyomiLang }.toSet().size)
@@ -64,27 +64,27 @@ class DramaTipIntegrationTest {
 
         assertEquals(
             "https://dramatip.net/category/popular",
-            DramaTipCatalogRoutes.popularUrl("https://dramatip.net", en, page = 1),
+            DramaPlatformCatalogRoutes.popularUrl("https://dramatip.net", en, page = 1),
         )
         assertEquals(
             "https://dramatip.net/de/category/trending",
-            DramaTipCatalogRoutes.popularUrl("https://dramatip.net", locales.first { it.siteLocale == "de" }, page = 1),
+            DramaPlatformCatalogRoutes.popularUrl("https://dramatip.net", locales.first { it.siteLocale == "de" }, page = 1),
         )
         assertEquals(
             "https://dramatip.net/id/category/populer/page/2",
-            DramaTipCatalogRoutes.popularUrl("https://dramatip.net", locales.first { it.siteLocale == "id" }, page = 2),
+            DramaPlatformCatalogRoutes.popularUrl("https://dramatip.net", locales.first { it.siteLocale == "id" }, page = 2),
         )
         assertEquals(
             "https://dramatip.net/pt/category/newly-added",
-            DramaTipCatalogRoutes.latestUrl("https://dramatip.net", pt, page = 1),
+            DramaPlatformCatalogRoutes.latestUrl("https://dramatip.net", pt, page = 1),
         )
         assertEquals(
             "https://dramatip.net/pt/series/page/3",
-            DramaTipCatalogRoutes.allSeriesFallbackUrl("https://dramatip.net", pt, page = 3),
+            DramaPlatformCatalogRoutes.allSeriesFallbackUrl("https://dramatip.net", pt, page = 3),
         )
         assertEquals(
             "https://dramatip.net/es/search?q=ceo+revenge&page=2",
-            DramaTipCatalogRoutes.searchUrl(
+            DramaPlatformCatalogRoutes.searchUrl(
                 baseUrl = "https://dramatip.net",
                 locale = locales.first { it.siteLocale == "es" },
                 page = 2,
@@ -95,7 +95,7 @@ class DramaTipIntegrationTest {
         )
         assertEquals(
             "https://dramatip.net/es/source/vigloo/page/2",
-            DramaTipCatalogRoutes.searchUrl(
+            DramaPlatformCatalogRoutes.searchUrl(
                 baseUrl = "https://dramatip.net",
                 locale = locales.first { it.siteLocale == "es" },
                 page = 2,
@@ -112,7 +112,7 @@ class DramaTipIntegrationTest {
         val masterUrl = "$baseUrl/hls/ep1/master.m3u8"
         val subUrl = "$baseUrl/subs/ep1.srt"
 
-        val cipherHelper = TestAesGcmEncryptor(DramaTipCipher.DEFAULT_KEY_BASE64)
+        val cipherHelper = TestAesGcmEncryptor(DramaPlatformCipher.DEFAULT_KEY_BASE64)
         val staleMasterEnc = cipherHelper.encrypt("$baseUrl/hls/expired/master.m3u8")
         val freshMasterEnc = cipherHelper.encrypt(masterUrl)
         val freshSubEnc = cipherHelper.encrypt(subUrl)
@@ -163,9 +163,9 @@ class DramaTipIntegrationTest {
             }
         }
 
-        val resolver = DramaTipStreamResolver(
+        val resolver = DramaPlatformStreamResolver(
             httpClient = client,
-            cipher = DramaTipCipher(),
+            cipher = DramaPlatformCipher(),
             loopbackProxy = proxy,
             userAgent = LoopbackStreamProxy.DEFAULT_USER_AGENT,
         )
@@ -173,7 +173,7 @@ class DramaTipIntegrationTest {
         val videos = resolver.resolveEpisodeVideos(
             episodeUrl = "/series/test-drama/episode-1#bookId=bk_77&serial=0&raw=1",
             baseUrl = baseUrl,
-            locale = DramaTipLocales.ALL.first { it.siteLocale == "en" },
+            locale = DramaPlatformLocales.ALL.first { it.siteLocale == "en" },
             preferredQuality = "720p",
             fastHlsMode = false,
         )
@@ -188,7 +188,7 @@ class DramaTipIntegrationTest {
 
     @Test
     fun `omits cross-origin Referer on Catalog Source headers and refuses Locked Episode playback without API calls`() {
-        val catalogHeaders = DramaTipCdnRouter.buildCatalogHeaders(LoopbackStreamProxy.DEFAULT_USER_AGENT).build()
+        val catalogHeaders = DramaPlatformCdnRouter.buildCatalogHeaders(LoopbackStreamProxy.DEFAULT_USER_AGENT).build()
         assertEquals(LoopbackStreamProxy.DEFAULT_USER_AGENT, catalogHeaders["User-Agent"])
         assertEquals(null, catalogHeaders["Referer"])
 
@@ -197,13 +197,13 @@ class DramaTipIntegrationTest {
             <script>self.__next_f.push([1,"1:{\"bookId\":\"bk_locked\",\"firstSerial\":1,\"rawCatalog\":false,\"episodes\":[{\"serial_number\":1,\"is_locked\":false},{\"serial_number\":2,\"is_locked\":true}]}\n"])</script>
             </body></html>
         """.trimIndent()
-        val shown = DramaTipParser.parseEpisodeList(htmlWithLocked, "/series/locked-test", showLockedEpisodes = true)
+        val shown = DramaPlatformParser.parseEpisodeList(htmlWithLocked, "/series/locked-test", showLockedEpisodes = true)
         val lockedEp = shown.first { it.episodeNumber == 2f }
         assertTrue(lockedEp.url.contains("locked=1"))
 
-        val resolver = DramaTipStreamResolver(
+        val resolver = DramaPlatformStreamResolver(
             httpClient = client,
-            cipher = DramaTipCipher(),
+            cipher = DramaPlatformCipher(),
             loopbackProxy = proxy,
             userAgent = LoopbackStreamProxy.DEFAULT_USER_AGENT,
         )
@@ -213,7 +213,7 @@ class DramaTipIntegrationTest {
             resolver.resolveEpisodeVideos(
                 episodeUrl = lockedEp.url,
                 baseUrl = baseUrl,
-                locale = DramaTipLocales.ALL.first { it.siteLocale == "en" },
+                locale = DramaPlatformLocales.ALL.first { it.siteLocale == "en" },
                 preferredQuality = "1080p",
                 fastHlsMode = false,
             )
@@ -221,8 +221,8 @@ class DramaTipIntegrationTest {
         assertTrue(error.message.orEmpty().contains("Locked Episode"))
         assertEquals(0, server.requestCount)
 
-        val resolverBytecode = DramaTipStreamResolver::class.java
-            .getResourceAsStream("DramaTipStreamResolver.class")!!
+        val resolverBytecode = DramaPlatformStreamResolver::class.java
+            .getResourceAsStream("DramaPlatformStreamResolver.class")!!
             .use { String(it.readBytes(), Charsets.ISO_8859_1) }
         org.junit.Assert.assertFalse(
             "Video is not a data class in Aniyomi extensions-lib 15; must not invoke copy\$default",

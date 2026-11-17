@@ -1,8 +1,8 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import java.net.URLEncoder
 
-data class DramaTipLocale(
+data class DramaPlatformLocale(
     val siteLocale: String,
     val aniyomiLang: String,
     val displayName: String,
@@ -13,41 +13,41 @@ data class DramaTipLocale(
         get() = if (siteLocale == "en") "" else "/$siteLocale"
 }
 
-object DramaTipLocales {
-    val ALL: List<DramaTipLocale> = listOf(
-        DramaTipLocale("en", "en", "English", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
-        DramaTipLocale("de", "de", "Deutsch", popularCategorySlug = "trending", latestCategorySlug = "new-releases"),
-        DramaTipLocale("es", "es", "Español", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
-        DramaTipLocale("ru", "ru", "Русский", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
-        DramaTipLocale("fr", "fr", "Français"),
-        DramaTipLocale("ar", "ar", "العربية"),
-        DramaTipLocale("ko", "ko", "한국어"),
-        DramaTipLocale("th", "th", "ไทย"),
-        DramaTipLocale("pt", "pt-BR", "Português"),
-        DramaTipLocale("it", "it", "Italiano"),
-        DramaTipLocale("ja", "ja", "日本語"),
-        DramaTipLocale("id", "id", "Bahasa Indonesia"),
-        DramaTipLocale("vi", "vi", "Tiếng Việt"),
-        DramaTipLocale("fil", "fil", "Filipino"),
-        DramaTipLocale("hi", "hi", "हिन्दी"),
-        DramaTipLocale("ms", "ms", "Bahasa Melayu"),
+object DramaPlatformLocales {
+    val ALL: List<DramaPlatformLocale> = listOf(
+        DramaPlatformLocale("en", "en", "English", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
+        DramaPlatformLocale("de", "de", "Deutsch", popularCategorySlug = "trending", latestCategorySlug = "new-releases"),
+        DramaPlatformLocale("es", "es", "Español", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
+        DramaPlatformLocale("ru", "ru", "Русский", popularCategorySlug = "popular", latestCategorySlug = "new-releases"),
+        DramaPlatformLocale("fr", "fr", "Français"),
+        DramaPlatformLocale("ar", "ar", "العربية"),
+        DramaPlatformLocale("ko", "ko", "한국어"),
+        DramaPlatformLocale("th", "th", "ไทย"),
+        DramaPlatformLocale("pt", "pt-BR", "Português"),
+        DramaPlatformLocale("it", "it", "Italiano"),
+        DramaPlatformLocale("ja", "ja", "日本語"),
+        DramaPlatformLocale("id", "id", "Bahasa Indonesia"),
+        DramaPlatformLocale("vi", "vi", "Tiếng Việt"),
+        DramaPlatformLocale("fil", "fil", "Filipino"),
+        DramaPlatformLocale("hi", "hi", "हिन्दी"),
+        DramaPlatformLocale("ms", "ms", "Bahasa Melayu"),
     )
 }
 
-object DramaTipCatalogRoutes {
+object DramaPlatformCatalogRoutes {
 
-    fun popularUrl(baseUrl: String, locale: DramaTipLocale, page: Int): String =
+    fun popularUrl(baseUrl: String, locale: DramaPlatformLocale, page: Int): String =
         paginatedPathUrl(baseUrl, "${locale.pathPrefix}/category/${locale.popularCategorySlug}", page)
 
-    fun latestUrl(baseUrl: String, locale: DramaTipLocale, page: Int): String =
+    fun latestUrl(baseUrl: String, locale: DramaPlatformLocale, page: Int): String =
         paginatedPathUrl(baseUrl, "${locale.pathPrefix}/category/${locale.latestCategorySlug}", page)
 
-    fun allSeriesFallbackUrl(baseUrl: String, locale: DramaTipLocale, page: Int): String =
+    fun allSeriesFallbackUrl(baseUrl: String, locale: DramaPlatformLocale, page: Int): String =
         paginatedPathUrl(baseUrl, "${locale.pathPrefix}/series", page)
 
     fun searchUrl(
         baseUrl: String,
-        locale: DramaTipLocale,
+        locale: DramaPlatformLocale,
         page: Int,
         query: String,
         categorySlug: String?,

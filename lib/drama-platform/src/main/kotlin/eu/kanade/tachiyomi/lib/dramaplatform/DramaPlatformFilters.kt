@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.AnimeFilter
 import kotlinx.serialization.encodeToString
@@ -28,7 +28,7 @@ class UpstreamProviderFilter(
     fun selectedSlug(): String? = if (state <= 0) null else options.getOrNull(state - 1)?.slug
 }
 
-object DramaTipFilters {
+object DramaPlatformFilters {
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -85,7 +85,7 @@ object DramaTipFilters {
         FilterOption("BiliTV", "bilitv"),
     )
 
-    fun defaultCategoriesFor(locale: DramaTipLocale): List<FilterOption> = buildList {
+    fun defaultCategoriesFor(locale: DramaPlatformLocale): List<FilterOption> = buildList {
         add(FilterOption("Most Watched", locale.popularCategorySlug))
         add(FilterOption("New Releases", locale.latestCategorySlug))
         for (option in DEFAULT_CATEGORIES.drop(2)) {

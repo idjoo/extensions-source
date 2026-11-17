@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -33,7 +33,7 @@ data class DecryptedStreamDescriptor(
 )
 
 @OptIn(ExperimentalEncodingApi::class)
-class DramaTipCipher(
+class DramaPlatformCipher(
     initialKeyBase64: String = DEFAULT_KEY_BASE64,
     private val onKeyRotated: ((String) -> Unit)? = null,
 ) {

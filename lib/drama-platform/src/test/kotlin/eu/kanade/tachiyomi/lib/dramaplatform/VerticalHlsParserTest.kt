@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.Video
 import okhttp3.Headers
@@ -69,31 +69,31 @@ class VerticalHlsParserTest {
     fun `applies Upstream Provider CDN wrapping, host-specific headers, and Stream Chain preferred quality ordering`() {
         val ua = "Mozilla/5.0 (Linux; Android 14)"
 
-        val dramawaveUrl = DramaTipCdnRouter.resolveDirectStreamUrl(
+        val dramawaveUrl = DramaPlatformCdnRouter.resolveDirectStreamUrl(
             DecryptedStreamCandidate(0, "DramaWave", "dramawave", "https://media.mydramawave.com/v1/ep1.m3u8", null),
         )
         assertEquals("https://cdn.dramadizilerim.xyz/https/media.mydramawave.com/v1/ep1.m3u8", dramawaveUrl)
         assertEquals(
             "https://hls-proxy-i4ic7.b-cdn.net/?url=https%3A%2F%2Fmedia.mydramawave.com%2Fv1%2Fep1.m3u8",
-            DramaTipCdnRouter.bunnyFallbackUrl(dramawaveUrl),
+            DramaPlatformCdnRouter.bunnyFallbackUrl(dramawaveUrl),
         )
 
-        val flickReelsWrapped = DramaTipCdnRouter.resolveDirectStreamUrl(
+        val flickReelsWrapped = DramaPlatformCdnRouter.resolveDirectStreamUrl(
             DecryptedStreamCandidate(0, "FlickReels", "hls", "https://akm.flickreels.net/play/1.m3u8", null),
         )
         assertEquals("https://cdn.dramadizilerim.xyz/https/akm.flickreels.net/play/1.m3u8", flickReelsWrapped)
 
-        val flickReelsDirect = DramaTipCdnRouter.resolveDirectStreamUrl(
+        val flickReelsDirect = DramaPlatformCdnRouter.resolveDirectStreamUrl(
             DecryptedStreamCandidate(0, "FlickReels", "hls", "https://pl.shortdizilab.com/play/1.m3u8", null),
         )
         assertEquals("https://pl.shortdizilab.com/play/1.m3u8", flickReelsDirect)
 
-        val happyShortBunny = DramaTipCdnRouter.resolveDirectStreamUrl(
+        val happyShortBunny = DramaPlatformCdnRouter.resolveDirectStreamUrl(
             DecryptedStreamCandidate(0, "HappyShort", "hls", "https://vod.tqshort.com/hls/ep1.m3u8", null),
         )
         assertEquals("https://hls-proxy-i4ic7.b-cdn.net/?url=https%3A%2F%2Fvod.tqshort.com%2Fhls%2Fep1.m3u8", happyShortBunny)
 
-        val legacyUnwrapped = DramaTipCdnRouter.resolveDirectStreamUrl(
+        val legacyUnwrapped = DramaPlatformCdnRouter.resolveDirectStreamUrl(
             DecryptedStreamCandidate(
                 0,
                 "Legacy",
@@ -104,20 +104,20 @@ class VerticalHlsParserTest {
         )
         assertEquals("https://hls-proxy-i4ic7.b-cdn.net/?url=https%3A%2F%2Forigin.example.com%2Fep1.m3u8", legacyUnwrapped)
 
-        val cdnHeaders = DramaTipCdnRouter.buildStreamHeaders(dramawaveUrl, "https://dramatip.net", ua)
+        val cdnHeaders = DramaPlatformCdnRouter.buildStreamHeaders(dramawaveUrl, "https://dramatip.net", ua)
         assertEquals("https://dramatip.net", cdnHeaders["Origin"])
         assertEquals("https://dramatip.net/", cdnHeaders["Referer"])
 
-        val reelInTvHeaders = DramaTipCdnRouter.buildStreamHeaders("https://video.reelintv.com/stream/1.mp4", "https://dramatip.net", ua)
+        val reelInTvHeaders = DramaPlatformCdnRouter.buildStreamHeaders("https://video.reelintv.com/stream/1.mp4", "https://dramatip.net", ua)
         assertNull(reelInTvHeaders["Referer"])
         assertNull(reelInTvHeaders["Origin"])
         assertEquals(ua, reelInTvHeaders["User-Agent"])
 
-        val petadramaHeaders = DramaTipCdnRouter.buildStreamHeaders("https://cfcdn.petadrama.com/stream/1.m3u8", "https://dramatip.net", ua)
+        val petadramaHeaders = DramaPlatformCdnRouter.buildStreamHeaders("https://cfcdn.petadrama.com/stream/1.m3u8", "https://dramatip.net", ua)
         assertNull(petadramaHeaders["Referer"])
         assertNull(petadramaHeaders["Origin"])
 
-        val ordered = DramaTipCdnRouter.sortStreamChainVideos(
+        val ordered = DramaPlatformCdnRouter.sortStreamChainVideos(
             chainGroups = listOf(
                 1 to listOf(
                     Video("https://mirror/1080.mp4", "DramaBox - 1080p", "https://mirror/1080.mp4"),

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.Track
 import eu.kanade.tachiyomi.animesource.model.Video
@@ -9,22 +9,24 @@ import okhttp3.Request
 import org.jsoup.Jsoup
 import java.net.URLEncoder
 
-class DramaTipStreamResolver(
+class DramaPlatformStreamResolver(
     private val httpClient: OkHttpClient,
-    private val cipher: DramaTipCipher,
+    private val cipher: DramaPlatformCipher,
     private val loopbackProxy: LoopbackStreamProxy,
     private val userAgent: String,
+    private val siteName: String = "DramaTip",
+    private val cdnOrigin: String = "https://dramatip.net",
 ) {
 
     fun resolveEpisodeVideos(
         episodeUrl: String,
         baseUrl: String,
-        locale: DramaTipLocale,
+        locale: DramaPlatformLocale,
         preferredQuality: String,
         fastHlsMode: Boolean,
     ): List<Video> {
         val cleanBase = baseUrl.trimEnd('/')
-        val urlRef = DramaTipParser.parseEpisodeUrl(episodeUrl)
+        val urlRef = DramaPlatformParser.parseEpisodeUrl(episodeUrl)
         val normalizedPath = if (urlRef.episodePath.startsWith("/")) {
             urlRef.episodePath
         } else {
@@ -34,11 +36,11 @@ class DramaTipStreamResolver(
 
         val playbackTarget = urlRef.playbackTarget ?: run {
             val pageHtml = fetchString(refererPageUrl, referer = "$cleanBase/") ?: return emptyList()
-            DramaTipParser.recoverPlaybackTarget(pageHtml, urlRef.displayNumber)
+            DramaPlatformParser.recoverPlaybackTarget(pageHtml, urlRef.displayNumber)
         } ?: return emptyList()
 
         if (playbackTarget.isLocked) {
-            throw IllegalStateException("This is a Locked Episode on DramaTip and is unavailable for free playback.")
+            throw IllegalStateException("This is a Locked Episode on $siteName and is unavailable for free playback.")
         }
 
         val initialVideos = fetchAndResolveDescriptor(
@@ -69,7 +71,7 @@ class DramaTipStreamResolver(
         target: PlaybackTarget,
         cleanBase: String,
         refererPageUrl: String,
-        locale: DramaTipLocale,
+        locale: DramaPlatformLocale,
         preferredQuality: String,
         fastHlsMode: Boolean,
         refresh: Boolean,
@@ -106,7 +108,7 @@ class DramaTipStreamResolver(
         val unverifiedFallbackGroups = mutableListOf<Pair<Int, List<Video>>>()
 
         for (candidate in decrypted.streamChain) {
-            val providerLabel = candidate.upstreamProvider?.takeIf(String::isNotBlank) ?: "DramaTip"
+            val providerLabel = candidate.upstreamProvider?.takeIf(String::isNotBlank) ?: siteName
             val streamType = candidate.streamType.lowercase()
 
             when {
@@ -160,8 +162,8 @@ class DramaTipStreamResolver(
                 }
 
                 isMp4Stream(streamType, candidate.url) -> {
-                    val directUrl = DramaTipCdnRouter.resolveDirectStreamUrl(candidate)
-                    val headers = DramaTipCdnRouter.buildStreamHeaders(directUrl, cleanBase, userAgent)
+                    val directUrl = DramaPlatformCdnRouter.resolveDirectStreamUrl(candidate)
+                    val headers = DramaPlatformCdnRouter.buildStreamHeaders(directUrl, cleanBase, userAgent, cdnOrigin)
                     val qLabel = "$providerLabel - ${candidate.qualityLabel ?: "Auto"}"
                     verifiedGroups.add(
                         candidate.chainIndex to listOf(
@@ -171,8 +173,8 @@ class DramaTipStreamResolver(
                 }
 
                 else -> {
-                    val directUrl = DramaTipCdnRouter.resolveDirectStreamUrl(candidate)
-                    val primaryHeaders = DramaTipCdnRouter.buildStreamHeaders(directUrl, cleanBase, userAgent)
+                    val directUrl = DramaPlatformCdnRouter.resolveDirectStreamUrl(candidate)
+                    val primaryHeaders = DramaPlatformCdnRouter.buildStreamHeaders(directUrl, cleanBase, userAgent, cdnOrigin)
                     val qLabel = "$providerLabel - ${candidate.qualityLabel ?: "Auto"}"
 
                     if (fastHlsMode) {
@@ -194,7 +196,7 @@ class DramaTipStreamResolver(
                                 externalSubtitles = externalSubtitles,
                             ).map { v ->
                                 val variantTarget = v.videoUrl ?: v.url
-                                val variantHeaders = DramaTipCdnRouter.buildStreamHeaders(variantTarget, cleanBase, userAgent)
+                                val variantHeaders = DramaPlatformCdnRouter.buildStreamHeaders(variantTarget, cleanBase, userAgent, cdnOrigin)
                                 Video(v.url, v.quality, v.videoUrl, variantHeaders, v.subtitleTracks, v.audioTracks)
                             }
                             verifiedGroups.add(candidate.chainIndex to parsed)
@@ -211,7 +213,7 @@ class DramaTipStreamResolver(
         }
 
         val chosenGroups = verifiedGroups.ifEmpty { unverifiedFallbackGroups }
-        return DramaTipCdnRouter.sortStreamChainVideos(chosenGroups, preferredQuality)
+        return DramaPlatformCdnRouter.sortStreamChainVideos(chosenGroups, preferredQuality)
     }
 
     private fun resolveLoopbackHls(
@@ -227,7 +229,7 @@ class DramaTipStreamResolver(
             "User-Agent",
             userAgent,
             "Origin",
-            "https://dramatip.net",
+            cdnOrigin,
             "Referer",
             "$cleanBase/",
         )
@@ -253,8 +255,8 @@ class DramaTipStreamResolver(
         fetchStringWithHeaders(primaryUrl, primaryHeaders)?.let { body ->
             return Triple(primaryUrl, body, primaryHeaders)
         }
-        val fallbackUrl = DramaTipCdnRouter.bunnyFallbackUrl(primaryUrl) ?: return null
-        val fallbackHeaders = DramaTipCdnRouter.buildStreamHeaders(fallbackUrl, cleanBase, userAgent)
+        val fallbackUrl = DramaPlatformCdnRouter.bunnyFallbackUrl(primaryUrl) ?: return null
+        val fallbackHeaders = DramaPlatformCdnRouter.buildStreamHeaders(fallbackUrl, cleanBase, userAgent, cdnOrigin)
         val fallbackBody = fetchStringWithHeaders(fallbackUrl, fallbackHeaders) ?: return null
         return Triple(fallbackUrl, fallbackBody, fallbackHeaders)
     }

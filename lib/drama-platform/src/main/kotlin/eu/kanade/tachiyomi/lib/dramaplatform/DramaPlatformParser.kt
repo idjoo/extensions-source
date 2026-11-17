@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.SAnime
 import kotlinx.serialization.json.Json
@@ -59,7 +59,7 @@ data class FilterOption(
     val slug: String,
 )
 
-object DramaTipParser {
+object DramaPlatformParser {
 
     private val SERIES_PATH_REGEX = Regex("""^(?:/[a-z]{2,3})?/series/([^/?#]+)/?$""")
     private val SERIES_OR_EPISODE_PATH_REGEX = Regex("""^((?:/[a-z]{2,3})?/series/[^/?#]+)(?:/episode-\d+)?/?$""")

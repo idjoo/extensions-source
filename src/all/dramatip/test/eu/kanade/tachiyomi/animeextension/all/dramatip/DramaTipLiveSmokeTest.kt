@@ -1,5 +1,10 @@
 package eu.kanade.tachiyomi.animeextension.all.dramatip
 
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformCatalogRoutes
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformCipher
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformLocales
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformParser
+import eu.kanade.tachiyomi.lib.dramaplatform.DramaPlatformStreamResolver
 import eu.kanade.tachiyomi.lib.streamproxy.LoopbackStreamProxy
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,11 +25,11 @@ class DramaTipLiveSmokeTest {
         val client = OkHttpClient()
         val ua = LoopbackStreamProxy.DEFAULT_USER_AGENT
         val baseUrl = DramaTip.DEFAULT_BASE_URL
-        val enLocale = DramaTipLocales.ALL.first { it.siteLocale == "en" }
+        val enLocale = DramaPlatformLocales.ALL.first { it.siteLocale == "en" }
 
         val popularHtml = client.newCall(
             Request.Builder()
-                .url(DramaTipCatalogRoutes.popularUrl(baseUrl, enLocale, page = 1))
+                .url(DramaPlatformCatalogRoutes.popularUrl(baseUrl, enLocale, page = 1))
                 .header("User-Agent", ua)
                 .build(),
         ).execute().use { res ->
@@ -32,7 +37,7 @@ class DramaTipLiveSmokeTest {
             res.body.string()
         }
 
-        val seriesPage = DramaTipParser.parseSeriesPage(popularHtml, currentPage = 1, baseUrl = baseUrl)
+        val seriesPage = DramaPlatformParser.parseSeriesPage(popularHtml, currentPage = 1, baseUrl = baseUrl)
         assertFalse("Expected non-empty Popular Series list", seriesPage.series.isEmpty())
 
         val firstSeries = seriesPage.series.first()
@@ -46,17 +51,17 @@ class DramaTipLiveSmokeTest {
             res.body.string()
         }
 
-        val details = DramaTipParser.parseSeriesDetails(seriesHtml, firstSeries.url, baseUrl)
+        val details = DramaPlatformParser.parseSeriesDetails(seriesHtml, firstSeries.url, baseUrl)
         assertTrue("Expected Series title", details.title.isNotBlank())
 
-        val episodes = DramaTipParser.parseEpisodeList(seriesHtml, firstSeries.url, showLockedEpisodes = false, baseUrl = baseUrl)
+        val episodes = DramaPlatformParser.parseEpisodeList(seriesHtml, firstSeries.url, showLockedEpisodes = false, baseUrl = baseUrl)
         assertFalse("Expected unlocked Episodes on popular Series", episodes.isEmpty())
 
         val episode1 = episodes.last()
         LoopbackStreamProxy(httpClient = client, userAgent = ua).use { proxy ->
-            val resolver = DramaTipStreamResolver(
+            val resolver = DramaPlatformStreamResolver(
                 httpClient = client,
-                cipher = DramaTipCipher(),
+                cipher = DramaPlatformCipher(),
                 loopbackProxy = proxy,
                 userAgent = ua,
             )

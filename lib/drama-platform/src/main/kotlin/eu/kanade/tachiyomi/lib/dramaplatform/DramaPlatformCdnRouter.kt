@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.animeextension.all.dramatip
+package eu.kanade.tachiyomi.lib.dramaplatform
 
 import eu.kanade.tachiyomi.animesource.model.Video
 import okhttp3.Headers
@@ -6,7 +6,7 @@ import java.net.URI
 import java.net.URLDecoder
 import java.net.URLEncoder
 
-object DramaTipCdnRouter {
+object DramaPlatformCdnRouter {
 
     const val CDN_PROXY_BASE = "https://cdn.dramadizilerim.xyz"
     const val BUNNY_HLS_PROXY_PREFIX = "https://hls-proxy-i4ic7.b-cdn.net/?url="
@@ -76,6 +76,7 @@ object DramaTipCdnRouter {
         targetUrl: String,
         baseUrl: String,
         userAgent: String,
+        cdnOrigin: String = "https://dramatip.net",
     ): Headers {
         val host = extractHost(targetUrl)
         return when {
@@ -84,9 +85,9 @@ object DramaTipCdnRouter {
                 "User-Agent",
                 userAgent,
                 "Origin",
-                "https://dramatip.net",
+                cdnOrigin.trimEnd('/'),
                 "Referer",
-                "https://dramatip.net/",
+                "${cdnOrigin.trimEnd('/')}/",
             )
             else -> Headers.headersOf(
                 "User-Agent",
